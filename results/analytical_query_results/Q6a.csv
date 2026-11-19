@@ -1,0 +1,4 @@
+result_group,inspections_with_known_count,avg_violations,median_violations,max_violations,high_violation_inspections
+Fail,13944,6.94,6.0,40,7668
+Conditional Pass,9507,5.16,4.0,25,3591
+Pass,37734,2.25,2.0,23,3740

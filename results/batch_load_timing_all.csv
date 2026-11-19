@@ -1,0 +1,11 @@
+step,seconds
+[initial] create audit record,0.002
+"[initial] stage 72,130 rows (COPY)",1.64
+[initial] DQ rules + dimensions + facts (CALL dw.load_batch),6.72
+[initial] create indexes + ANALYZE,1.051
+[incremental] create audit record,0.002
+"[incremental] stage 1,471 rows (COPY)",0.034
+[incremental] DQ rules + dimensions + facts (CALL dw.load_batch),0.503
+[rerun] create audit record,0.001
+"[rerun] stage 1,471 rows (COPY)",0.031
+[rerun] DQ rules + dimensions + facts (CALL dw.load_batch),0.333

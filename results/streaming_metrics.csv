@@ -1,0 +1,16 @@
+metric,value
+valid events stored,3647.0
+rejected test events,24.0
+"sustained throughput (events/s, producer to ClickHouse)",80.0
+"latency avg (ms), emit -> ClickHouse",1518.0
+latency median (ms),1510.0
+latency p95 (ms),2457.0
+latency max (ms),3541.0
+"ClickHouse query: KPI totals (window_agg, 6 stats) (median ms)",7.3
+ClickHouse query: top facility types (events) (median ms),5.6
+ClickHouse query: area alerts by ZIP (events) (median ms),6.4
+ClickHouse query: risk distribution (window_agg) (median ms),5.7
+"memory (RSS, MB): Kafka broker",396.0
+"memory (RSS, MB): ClickHouse server",704.0
+"memory (RSS, MB): Spark streaming job (python + JVM)",1244.0
+"memory (RSS, MB): Grafana",175.0

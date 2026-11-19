@@ -1,0 +1,8 @@
+data/raw/*.csv
+data/curated/*.csv
+.env
+runtime/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+dashboard/powerbi/data/

@@ -1,0 +1,4 @@
+candidate_key,distinct_values,largest_single_value_share_%,non_empty_shards_of_32,rows_per_shard_mean,rows_per_shard_max,shard_skew_max_over_mean,shard_cv,worker_split_max_over_mean_(2_workers)
+facility_key,17083,0.04,32,1929,2119,1.1,0.047,1.0
+location_key,252,3.1,32,1929,4943,2.56,0.608,1.049
+date_key,986,0.17,32,1929,2544,1.32,0.142,1.043

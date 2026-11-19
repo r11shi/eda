@@ -1,0 +1,3 @@
+query,star_joins,snowflake_joins,star_ms,snowflake_ms
+"QA: fail rate by year, quarter, facility group and area group",3,9,37.3,78.3
+"QB: inspections by facility type, risk group and result group",2,5,30.4,46.9

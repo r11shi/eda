@@ -1,0 +1,4 @@
+path,conditions,n (2022-24),fail % (2022-24),n (2025),fail % (2025)
+HIGHEST fail rate,prior_inspection_result_Fail <= 0.5 AND inspection_type_Complaint > 0.5 AND prior_violation_count > 6.5 AND days_since_prior_inspection > 147.5,327,54.7,140,57.9
+LOWEST fail rate,prior_inspection_result_Fail > 0.5 AND facility_type_School <= 0.5 AND prior_violation_count <= 13.5 AND prior_violation_count <= 7.5 AND days_since_prior_inspection <= 36.5 AND area_Northwest > 0.5 AND prior_violation_count <= 4.5 AND prior_inspection_count <= 3.5,1398,3.7,208,4.8
+LARGEST group,prior_inspection_result_Fail <= 0.5 AND inspection_type_Complaint <= 0.5 AND zip_60617 <= 0.5 AND inspection_type_Canvass Re-Inspection <= 0.5 AND prior_inspection_result_Pass <= 0.5 AND area_Southwest <= 0.5 AND zip_60666 <= 0.5 AND area_Northeast <= 0.5,10757,26.9,2360,27.5

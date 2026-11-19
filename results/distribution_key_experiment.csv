@@ -1,0 +1,25 @@
+query,distribution_key,distributed_ms,worker_port,shards,bytes_total,bytes_largest_shard,bytes_smallest_shard
+Q1 results by facility type,facility_key,223.2,,,,,
+Q2 failure rate by area,facility_key,148.1,,,,,
+Q3 monthly inspections,facility_key,132.3,,,,,
+Q4 violations by risk,facility_key,197.6,,,,,
+Q5 facility x year aggregation,facility_key,212.8,,,,,
+SHARD SIZES,facility_key,,5441.0,16.0,54181888.0,3768320.0,3072000.0
+SHARD SIZES,facility_key,,5442.0,16.0,50864128.0,3694592.0,2965504.0
+SHARD SKEW max/mean,facility_key,1.1479373001637683,,,,,
+Q1 results by facility type,location_key,225.7,,,,,
+Q2 failure rate by area,location_key,144.0,,,,,
+Q3 monthly inspections,location_key,106.7,,,,,
+Q4 violations by risk,location_key,216.6,,,,,
+Q5 facility x year aggregation,location_key,255.3,,,,,
+SHARD SIZES,location_key,,5441.0,16.0,57384960.0,8167424.0,950272.0
+SHARD SIZES,location_key,,5442.0,16.0,50044928.0,6799360.0,155648.0
+SHARD SKEW max/mean,location_key,2.432819887143511,,,,,
+Q1 results by facility type,date_key,247.9,,,,,
+Q2 failure rate by area,date_key,151.0,,,,,
+Q3 monthly inspections,date_key,133.5,,,,,
+Q4 violations by risk,date_key,174.3,,,,,
+Q5 facility x year aggregation,date_key,255.8,,,,,
+SHARD SIZES,date_key,,5441.0,16.0,52420608.0,4136960.0,2514944.0
+SHARD SIZES,date_key,,5442.0,16.0,49815552.0,3891200.0,2588672.0
+SHARD SKEW max/mean,date_key,1.294871794871795,,,,,

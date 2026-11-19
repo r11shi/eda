@@ -1,0 +1,19 @@
+# PostgreSQL 16 with exactly the database, user and password the project expects:   docker compose up -d db
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: foodsafety
+      POSTGRES_PASSWORD: foodsafety
+      POSTGRES_DB: foodsafety
+    ports:
+      - "${FS_DB_PORT:-5432}:5432"
+    volumes:
+      - foodsafety-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U foodsafety -d foodsafety"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+volumes:
+  foodsafety-data:

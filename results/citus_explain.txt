@@ -1,0 +1,34 @@
+--- Q1 results by facility type (distributed by facility_key, 1,000,000 rows)
+HashAggregate
+  Group Key: remote_scan.facility_type, remote_scan.result_group
+  ->  Custom Scan (Citus Adaptive)
+        Task Count: 32
+        Tasks Shown: One of 32
+        ->  Task
+              Node: host=localhost port=5441 dbname=foodsafety_citus
+              ->  HashAggregate
+                    Group Key: fa.facility_type, r.result_group
+                    ->  Hash Join
+                          Hash Cond: (f.result_key = r.result_key)
+                          ->  Hash Join
+                                Hash Cond: (f.facility_key = fa.facility_key)
+                                ->  Seq Scan on fact_1000000_facility_key_102108 f
+                                ->  Hash
+                                      ->  Seq Scan on dim_facility_102009 fa
+                          ->  Hash
+                                ->  Seq Scan on dim_result_102010 r
+
+--- Q5 facility x year aggregation (distributed by facility_key, 1,000,000 rows)
+Custom Scan (Citus Adaptive)
+  Task Count: 32
+  Tasks Shown: One of 32
+  ->  Task
+        Node: host=localhost port=5441 dbname=foodsafety_citus
+        ->  HashAggregate
+              Group Key: f.facility_key, d.year
+              ->  Hash Join
+                    Hash Cond: (f.date_key = d.date_key)
+                    ->  Seq Scan on fact_1000000_facility_key_102108 f
+                    ->  Hash
+                          ->  Seq Scan on dim_date_102008 d
+

@@ -1,0 +1,6 @@
+criterion,star,snowflake,fact_constellation
+Number of tables,6.0,16.0,7.0
+Joins for QA (year/quarter x facility group x area),3.0,9.0,3.0
+QA median time (ms),37.3,78.3,37.3
+QB median time (ms),30.4,46.9,30.4
+Facility x year question: median time (ms),21.7,21.7,2.7

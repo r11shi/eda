@@ -1,0 +1,575 @@
+{
+  "uid": "food-safety-rt",
+  "title": "Food Safety: Real-Time Inspection Monitor (replay simulation)",
+  "tags": [
+    "food-safety",
+    "replay-simulation"
+  ],
+  "timezone": "utc",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "## Food Safety: real-time inspection monitor  (REPLAY SIMULATION)\n**The official Chicago dataset is a historical file, not a live feed.** Completed inspections are replayed in date order through Kafka -> Spark Structured Streaming -> ClickHouse at an accelerated speed. All figures below describe the replay, not today's inspections."
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Inspections (replay, in range)",
+      "description": "",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "table",
+          "rawSql": "SELECT sum(inspections) FROM food.window_agg FINAL WHERE $__timeFilter(window_start)",
+          "refId": "A",
+          "pluginVersion": "4.23.3"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "unit": "none",
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Peak inspections / minute",
+      "description": "Highest 10-second window, expressed as a per-minute rate (x 6)",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "table",
+          "rawSql": "SELECT max(c) * 6 FROM (SELECT window_start, sum(inspections) c FROM food.window_agg FINAL WHERE $__timeFilter(window_start) GROUP BY window_start)",
+          "refId": "A",
+          "pluginVersion": "4.23.3"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "unit": "none",
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Fails",
+      "description": "",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "table",
+          "rawSql": "SELECT sum(inspections) FROM food.window_agg FINAL WHERE $__timeFilter(window_start) AND result_group = 'Fail'",
+          "refId": "A",
+          "pluginVersion": "4.23.3"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          },
+          "unit": "none",
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Passes",
+      "description": "",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "table",
+          "rawSql": "SELECT sum(inspections) FROM food.window_agg FINAL WHERE $__timeFilter(window_start) AND result_group = 'Pass'",
+          "refId": "A",
+          "pluginVersion": "4.23.3"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "unit": "none",
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Violations cited",
+      "description": "",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "table",
+          "rawSql": "SELECT sum(violations) FROM food.window_agg FINAL WHERE $__timeFilter(window_start)",
+          "refId": "A",
+          "pluginVersion": "4.23.3"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          },
+          "unit": "none",
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "High-violation inspections (6+)",
+      "description": "",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "table",
+          "rawSql": "SELECT sum(high_violation_inspections) FROM food.window_agg FINAL WHERE $__timeFilter(window_start)",
+          "refId": "A",
+          "pluginVersion": "4.23.3"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "dark-red"
+          },
+          "unit": "none",
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Inspections per minute (rate from 10-second windows) by result",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 7,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 2,
+          "queryType": "timeseries",
+          "rawSql": "SELECT window_start AS time, result_group, sum(inspections) * 6 AS inspections_per_minute FROM food.window_agg FINAL WHERE $__timeFilter(window_start) GROUP BY time, result_group ORDER BY time",
+          "refId": "A",
+          "pluginVersion": "4.23.3"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "stacking": {
+              "mode": "normal"
+            },
+            "fillOpacity": 70
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 9,
+      "type": "bargauge",
+      "title": "Top facility types",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 7,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "table",
+          "rawSql": "SELECT facility_type, count() AS inspections FROM food.inspection_events WHERE $__timeFilter(ingest_ts) GROUP BY facility_type ORDER BY inspections DESC LIMIT 8",
+          "refId": "A",
+          "pluginVersion": "4.23.3"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "piechart",
+      "title": "Risk distribution",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 7,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "table",
+          "rawSql": "SELECT risk_group, sum(inspections) AS inspections FROM food.window_agg FINAL WHERE $__timeFilter(window_start) GROUP BY risk_group",
+          "refId": "A",
+          "pluginVersion": "4.23.3"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "pieType": "donut",
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "table",
+      "title": "Area alerts: ZIP codes with at least 5 inspections and a fail rate of 40% or more (about twice the average)",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 14,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "table",
+          "rawSql": "SELECT zip AS ZIP, count() AS inspections, sum(is_fail) AS fails, round(100 * sum(is_fail) / count(), 1) AS fail_rate_pct, if(count() >= 5 AND 100 * sum(is_fail) / count() >= 40, 'ALERT', 'ok') AS status FROM food.inspection_events WHERE $__timeFilter(ingest_ts) GROUP BY zip HAVING count() >= 5 ORDER BY fail_rate_pct DESC LIMIT 12",
+          "refId": "A",
+          "pluginVersion": "4.23.3"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "ALERT": {
+                        "color": "red",
+                        "text": "ALERT"
+                      },
+                      "ok": {
+                        "color": "green",
+                        "text": "ok"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "type": "table",
+      "title": "Pipeline health: events, rejected events and end-to-end latency",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 15,
+        "w": 10,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "queryType": "table",
+          "rawSql": "SELECT 'valid events' AS metric, toString(count()) AS value FROM food.inspection_events WHERE $__timeFilter(ingest_ts) UNION ALL SELECT 'rejected events (validation rules)', toString(count()) FROM food.invalid_events WHERE $__timeFilter(ingest_ts) UNION ALL SELECT 'avg latency emit -> ClickHouse (ms)', toString(round(avg(dateDiff('millisecond', emitted_at, written_at)))) FROM food.inspection_events WHERE $__timeFilter(ingest_ts) UNION ALL SELECT 'p95 latency (ms)', toString(round(quantile(0.95)(dateDiff('millisecond', emitted_at, written_at)))) FROM food.inspection_events WHERE $__timeFilter(ingest_ts)",
+          "refId": "A",
+          "pluginVersion": "4.23.3"
+        }
+      ]
+    }
+  ],
+  "editable": true
+}

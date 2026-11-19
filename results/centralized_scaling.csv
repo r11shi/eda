@@ -1,0 +1,26 @@
+query,rows,centralized_ms
+Q1 results by facility type,61737,26.4
+Q2 failure rate by area,61737,26.2
+Q3 monthly inspections,61737,20.0
+Q4 violations by risk,61737,32.9
+Q5 facility x year aggregation,61737,56.5
+Q1 results by facility type,100000,38.9
+Q2 failure rate by area,100000,43.3
+Q3 monthly inspections,100000,34.7
+Q4 violations by risk,100000,49.8
+Q5 facility x year aggregation,100000,59.5
+Q1 results by facility type,500000,78.3
+Q2 failure rate by area,500000,60.2
+Q3 monthly inspections,500000,58.7
+Q4 violations by risk,500000,56.0
+Q5 facility x year aggregation,500000,257.3
+Q1 results by facility type,1000000,178.3
+Q2 failure rate by area,1000000,113.2
+Q3 monthly inspections,1000000,91.0
+Q4 violations by risk,1000000,88.8
+Q5 facility x year aggregation,1000000,307.0
+Q1 results by facility type,2000000,269.3
+Q2 failure rate by area,2000000,232.0
+Q3 monthly inspections,2000000,174.5
+Q4 violations by risk,2000000,186.2
+Q5 facility x year aggregation,2000000,255.1

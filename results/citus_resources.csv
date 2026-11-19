@@ -1,0 +1,5 @@
+cluster,resident_memory_MB
+main,124
+coord,277
+worker1,907
+worker2,922

@@ -1,0 +1,16 @@
+facility_type,facility_group,inspections,pct_of_all
+Restaurant,Restaurant & Food Service,42908,69.50
+Grocery Store,Retail Food & Grocery,5857,9.49
+School,Schools & Childcare,4472,7.24
+Children's Services Facility,Schools & Childcare,2404,3.89
+Daycare Above And Under 2 Years,Schools & Childcare,1003,1.62
+Bakery,Retail Food & Grocery,847,1.37
+Long Term Care,Healthcare & Residential Care,713,1.15
+Daycare (2 - 6 Years),Schools & Childcare,409,0.66
+Mobile Food Preparer,"Mobile, Catering & Events",392,0.63
+Catering,"Mobile, Catering & Events",356,0.58
+Hospital,Healthcare & Residential Care,265,0.43
+Liquor,Retail Food & Grocery,226,0.37
+Golden Diner,Healthcare & Residential Care,210,0.34
+Shared Kitchen User (Long Term),"Mobile, Catering & Events",205,0.33
+Shared Kitchen,"Mobile, Catering & Events",115,0.19

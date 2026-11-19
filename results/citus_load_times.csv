@@ -1,0 +1,6 @@
+rows,distribution_key,load_and_index_s
+61737,facility_key,1.2
+100000,facility_key,1.2
+500000,facility_key,2.7
+1000000,facility_key,5.1
+2000000,facility_key,7.7

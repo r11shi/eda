@@ -1,0 +1,5 @@
+object,before,after_failed_load,unchanged
+dw.fact_inspection,61737,61737,True
+dw.dim_facility,17084,17084,True
+dw.dim_location,253,253,True
+dw.fact_facility_annual_inspection_performance,42154,42154,True
