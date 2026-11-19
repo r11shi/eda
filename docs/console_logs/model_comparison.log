@@ -1,0 +1,13 @@
+                                          criterion  star  snowflake  fact_constellation
+                                   Number of tables   6.0       16.0                 7.0
+Joins for QA (year/quarter x facility group x area)   3.0        9.0                 3.0
+                                QA median time (ms)  31.3       57.4                31.3
+                                QB median time (ms)  25.0       35.3                25.0
+         Facility x year question: median time (ms)  15.2       15.2                 1.9
+                                                        query  star_joins  snowflake_joins  star_ms  snowflake_ms
+QA: fail rate by year, quarter, facility group and area group           3                9     31.3          57.4
+QB: inspections by facility type, risk group and result group           2                5     25.0          35.3
+star+constellation schema (dw): 7 tables, 22 MB | snowflake (snow): 16 tables, 13 MB
+dimension bytes: dw 4251648  snow 3366912
+rows: fact 61737 annual fact 42154 dim_facility 17084
+[('dw.dim_facility', 17084), ('snow.dim_facility', 17084), ('snow.dim_facility_type', 161), ('snow.dim_facility_group', 7), ('dw.dim_date', 1826), ('snow.dim_date', 1826), ('snow.dim_month', 60), ('dw.dim_location', 252), ('snow.dim_location', 252), ('snow.dim_zip', 100)]

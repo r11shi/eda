@@ -72,6 +72,7 @@ if not pathlib.Path("Project/data/raw/food_inspections_2022_2025.csv").exists():
     !python Project/scripts/fetch_data.py
 else:
     print("raw file already present, download skipped")'''))
+writefile("etl/config.py", "database settings shared by all scripts (defaults match the Colab set-up).")
 writefile("etl/curation.py", "the curation library: loading, cleaning rules (each counted and justified), derived attributes (violation count, bands, groups, area, season).")
 cells.append(md("Next come the curation notebook and the EDA notebook of the project, embedded as they are. They use relative paths, so the working folder is changed to `Project/notebooks` first."))
 cells.append(code('os.chdir(WORK / "Project" / "notebooks")\nprint(os.getcwd())'))

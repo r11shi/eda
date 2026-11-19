@@ -1,0 +1,21 @@
+Q1a       4 rows      10.0 ms  Q1a Annual inspection volume
+Q1b      48 rows      13.3 ms  Q1b Monthly inspection volume
+Q2       15 rows      19.0 ms  Q2 Facility types receiving the most inspections
+Q3        4 rows      12.9 ms  Q3 Pass, conditional-pass and fail rates by year
+Q4        4 rows      18.8 ms  Q4 Results across risk categories
+Q5        8 rows      13.1 ms  Q5 Inspection types associated with higher failure rates
+Q6a       3 rows      23.7 ms  Q6a Violation counts by result group
+Q6b      15 rows      40.2 ms  Q6b Most common violation rule numbers (rule-level detail is kept in staging, not in the star schema)
+Q7a       5 rows      12.7 ms  Q7a Geographic area groups: failures and failure rate
+Q7b      10 rows      13.3 ms  Q7b ZIP codes with the highest failure rate (at least 200 inspections)
+Q7c      10 rows      12.9 ms  Q7c ZIP codes with the most failures (counts, not rates)
+Q8a       4 rows      52.2 ms  Q8a Repeat inspections: fail rate by the position of the inspection in the facility's history (licensed facilities only)
+Q8b       1 rows      66.4 ms  Q8b Repeat inspections: what happens at the next inspection after a failed one
+Q8c      10 rows      35.2 ms  Q8c Facilities with the most inspections in the period
+                                           query         stage  median_ms                                           plan_top
+history of one facility (WHERE facility_key = x) without index       2.93 Aggregate  (cost=1473.85..1473.86 rows=1 width=16)
+history of one facility (WHERE facility_key = x)    with index       0.15     Aggregate  (cost=90.77..90.78 rows=1 width=16)
+       one month of inspections (date_key range) without index       2.76 Aggregate  (cost=1631.95..1631.96 rows=1 width=16)
+       one month of inspections (date_key range)    with index       0.46     Aggregate  (cost=32.48..32.49 rows=1 width=16)
+                  one batch (WHERE batch_id = 2) without index       4.13  Aggregate  (cost=1476.48..1476.49 rows=1 width=8)
+                  one batch (WHERE batch_id = 2)    with index       0.14      Aggregate  (cost=25.85..25.86 rows=1 width=8)

@@ -10,7 +10,7 @@ plus a distributed warehouse (Citus) and a real-time warehouse (Kafka, Spark, Cl
 
 | Start here | |
 |---|---|
-| `docs/Technical_Report.pdf` | summary of the whole project |
+| `docs/Food_Safety_Analytics_Report.pdf` | the full project report (Word version: `.docx`); `docs/Technical_Report.pdf` is the 8-page summary |
 | `docs/Presentation.pptx` | the slides |
 | `dashboard/food_safety_dashboard.html` | the dashboard: double-click, it opens in any browser |
 | `Food_Safety_Project_Colab.ipynb` | all the code in one notebook, saved with its outputs |
@@ -148,10 +148,11 @@ Extra packages: `clickhouse-connect kafka-python-ng`. The measured results are a
 
 ## 4. Regenerating the documents (optional)
 ```bash
-pip install markdown python-pptx pillow
-python build_docs/make_technical_report.py     # needs Node + Playwright, or set CHROME_PATH to a Chromium binary
-python build_docs/make_presentation.py
+pip install python-docx python-pptx pillow markdown
+python build_docs/build_slides.py      # docs/Presentation.pptx
+python build_docs/build_report.py      # docs/Food_Safety_Analytics_Report.docx (and the PDF copy if LibreOffice is installed)
 ```
+Before submitting, edit the department, guide and course name at the top of `build_docs/build_report.py`.
 
 ## 5. Troubleshooting
 
