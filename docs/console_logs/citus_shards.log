@@ -1,0 +1,9 @@
+$ psql -p 5440 -d foodsafety_citus
+SELECT nodeport AS worker, count(*) AS shards, pg_size_pretty(sum(shard_size)) AS data
+FROM citus_shards WHERE table_name = 'bench.fact_2000000_facility_key'::regclass GROUP BY nodeport ORDER BY nodeport;
+ worker | shards | data  
+--------+--------+-------
+   5441 |     16 | 95 MB
+   5442 |     16 | 94 MB
+(2 rows)
+

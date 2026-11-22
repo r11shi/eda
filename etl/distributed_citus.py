@@ -108,7 +108,8 @@ with open(ROOT / "results" / "citus_explain.txt", "w") as f:
         cc.execute("EXPLAIN (COSTS OFF) " + QUERIES[qname].format(f=f"bench.fact_{KEY_TEST_VOLUME}_facility_key"))
         f.write(f"--- {qname} (distributed by facility_key, {KEY_TEST_VOLUME:,} rows)\n" + "\n".join(r[0] for r in cc.fetchall()) + "\n\n")
 ps = subprocess.run("ps -eo rss,args", shell=True, capture_output=True, text=True).stdout.splitlines()
-res = {name: round(sum(int(l.split(None, 1)[0]) for l in ps if f"16/{name}" in l) / 1024) for name in ["main", "coord", "worker1", "worker2"]}
+import re
+res = {name: round(sum(int(l.split(None, 1)[0]) for l in ps if re.search(rf"/\d+/{name}\b", l)) / 1024) for name in ["main", "coord", "worker1", "worker2"]}   # any PostgreSQL major version
 pd.DataFrame([{"cluster": k, "resident_memory_MB": v} for k, v in res.items()]).to_csv(ROOT / "results" / "citus_resources.csv", index=False)
 print("resident memory (MB):", res)
 print(scal.to_string(index=False))

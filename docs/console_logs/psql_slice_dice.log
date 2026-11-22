@@ -1,0 +1,15 @@
+$ psql -d foodsafety
+SELECT t.inspection_type_group, count(*) AS inspections, round(100.0 * sum(f.fail_count) / count(*), 1) AS fail_rate_pct
+FROM dw.fact_inspection f JOIN dw.dim_date d USING (date_key) JOIN dw.dim_facility fa USING (facility_key)
+JOIN dw.dim_inspection_type t USING (inspection_type_key)
+WHERE d.year = 2025 AND fa.risk_group = 'High'          -- dice: year 2025 and high risk
+GROUP BY 1 ORDER BY 2 DESC;
+ inspection_type_group | inspections | fail_rate_pct 
+-----------------------+-------------+---------------
+ Routine (Canvass)     |        7355 |          22.9
+ Re-inspection         |        2892 |          10.5
+ Complaint / Illness   |        1575 |          31.4
+ License               |        1315 |          21.6
+ Other                 |          33 |           9.1
+(5 rows)
+

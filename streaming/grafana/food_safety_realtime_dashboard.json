@@ -1,6 +1,6 @@
 {
   "uid": "food-safety-rt",
-  "title": "Food Safety: Real-Time Inspection Monitor (replay simulation)",
+  "title": "E \u00b7 Real-time warehouse: inspection monitor (replay simulation)",
   "tags": [
     "food-safety",
     "replay-simulation"
@@ -10,7 +10,7 @@
   "version": 1,
   "refresh": "5s",
   "time": {
-    "from": "now-15m",
+    "from": "now-6h",
     "to": "now"
   },
   "panels": [
@@ -571,5 +571,6 @@
       ]
     }
   ],
-  "editable": true
+  "editable": true,
+  "links": []
 }

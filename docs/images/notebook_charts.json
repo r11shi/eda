@@ -1,0 +1,113 @@
+{
+ "nb_02_eda_1.png": {
+  "notebook": "02_eda",
+  "section": "A. Numerical analysis",
+  "titles": [
+   "ViolationCount: histogram",
+   "ViolationCount: box plot",
+   "ViolationCount by result",
+   "Inspections per facility",
+   "Inspections per month: histogram",
+   "Inspections per month: box plot"
+  ]
+ },
+ "nb_02_eda_2.png": {
+  "notebook": "02_eda",
+  "section": "B. Categorical analysis",
+  "titles": [
+   "Result mix (%) by {col}"
+  ]
+ },
+ "nb_02_eda_3.png": {
+  "notebook": "02_eda",
+  "section": "C. Temporal analysis",
+  "titles": [
+   "Inspections per year",
+   "Inspections per quarter (by year)",
+   "Monthly inspections (one line per year)",
+   "Inspections per week",
+   "Inspections by day of week",
+   "Fail rate (%) by month"
+  ]
+ },
+ "nb_02_eda_4.png": {
+  "notebook": "02_eda",
+  "section": "D. Geographic analysis",
+  "titles": [
+   "Inspection locations (20,000 sampled, validated coordinates)",
+   "ZIP codes: volume vs fail rate (>= 200 inspections)"
+  ]
+ },
+ "nb_02_eda_5.png": {
+  "notebook": "02_eda",
+  "section": "E. Outcome / performance analysis (volume versus rate)",
+  "titles": [
+   "Volume: inspections by facility group",
+   "Rate: fail rate (%) by facility group"
+  ]
+ },
+ "nb_07_regression_1.png": {
+  "notebook": "07_regression",
+  "section": "2. Feature engineering and categorical encoding",
+  "titles": [
+   "Simple linear regression (2025 test inspections)"
+  ]
+ },
+ "nb_07_regression_2.png": {
+  "notebook": "07_regression",
+  "section": "2. Feature engineering and categorical encoding",
+  "titles": [
+   "Actual vs predicted (test 2025)",
+   "Residuals vs predicted",
+   "Distribution of residuals"
+  ]
+ },
+ "nb_07_regression_3.png": {
+  "notebook": "07_regression",
+  "section": "2. Feature engineering and categorical encoding",
+  "titles": [
+   "Largest regression coefficients"
+  ]
+ },
+ "nb_08_association_mining_1.png": {
+  "notebook": "08_association_mining",
+  "section": "1. Building the transactions",
+  "titles": [
+   "Most frequent items"
+  ]
+ },
+ "nb_08_association_mining_2.png": {
+  "notebook": "08_association_mining",
+  "section": "4. Rule evaluation and selection of meaningful rules",
+  "titles": [
+   "All rules (support >= 0.02, confidence >= 0.5)"
+  ]
+ },
+ "nb_09_decision_tree_1.png": {
+  "notebook": "09_decision_tree",
+  "section": "2. Encoding and the model-selection plan",
+  "titles": []
+ },
+ "nb_09_decision_tree_2.png": {
+  "notebook": "09_decision_tree",
+  "section": "3. Final model: refit on 2022-2024, evaluate once on the 2025 test year",
+  "titles": [
+   "Confusion matrix, {title}",
+   "ROC curve (2025 test)"
+  ]
+ },
+ "nb_09_decision_tree_3.png": {
+  "notebook": "09_decision_tree",
+  "section": "3. Final model: refit on 2022-2024, evaluate once on the 2025 test year",
+  "titles": [
+   "Decision tree: feature importance"
+  ]
+ },
+ "nb_09_decision_tree_4.png": {
+  "notebook": "09_decision_tree",
+  "section": "4. The trained tree and three actual decision paths",
+  "titles": [
+   "Decision tree (first 3 levels of %d)"
+  ]
+ }
+}

@@ -1,8 +1,7 @@
 object,before_incremental,after_incremental
 fact_inspection,60608,61737
 dim_facility,16902,17084
-dim_location,253,253
+dim_location,252,252
 dim_inspection_type,15,15
 dim_result,4,4
 fact_facility_annual,41546,42154
-checksum_batch1_rows,b6de0058b871f24df482411546209e5d,b6de0058b871f24df482411546209e5d

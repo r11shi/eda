@@ -1,0 +1,13 @@
+$ psql -d foodsafety -c '\dt+ dw.*'
+                                                         List of tables
+ Schema |                    Name                     | Type  |   Owner    | Persistence | Access method |  Size   | Description 
+--------+---------------------------------------------+-------+------------+-------------+---------------+---------+-------------
+ dw     | dim_date                                    | table | foodsafety | permanent   | heap          | 176 kB  | 
+ dw     | dim_facility                                | table | foodsafety | permanent   | heap          | 2552 kB | 
+ dw     | dim_inspection_type                         | table | foodsafety | permanent   | heap          | 16 kB   | 
+ dw     | dim_location                                | table | foodsafety | permanent   | heap          | 56 kB   | 
+ dw     | dim_result                                  | table | foodsafety | permanent   | heap          | 16 kB   | 
+ dw     | fact_facility_annual_inspection_performance | table | foodsafety | permanent   | heap          | 4368 kB | 
+ dw     | fact_inspection                             | table | foodsafety | permanent   | heap          | 5648 kB | 
+(7 rows)
+

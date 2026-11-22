@@ -1,5 +1,5 @@
 risk_group,inspections,pass_rate,conditional_rate,fail_rate,avg_violations
-High,50275,61.05,15.85,23.10,3.90
-Medium,8818,61.02,16.36,22.61,3.39
-Low,2642,62.83,12.45,24.72,2.70
+High,50281,61.04,15.86,23.10,3.90
+Medium,8821,61.04,16.36,22.61,3.39
+Low,2633,62.89,12.42,24.69,2.69
 Unknown,2,100.00,0.00,0.00,0.00

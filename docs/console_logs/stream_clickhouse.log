@@ -1,0 +1,20 @@
+$ clickhouse client   (ClickHouse, real-time warehouse)
+:) SELECT count() AS valid_events, min(event_date) AS first_day, max(event_date) AS last_day FROM food.inspection_events
+   ┌─valid_events─┬──first_day─┬───last_day─┐
+1. │         3647 │ 2025-10-01 │ 2025-12-31 │
+   └──────────────┴────────────┴────────────┘
+
+:) SELECT reason, count() AS events FROM food.invalid_events GROUP BY reason ORDER BY events DESC
+   ┌─reason─────────────────────────────────────────────┬─events─┐
+1. │ not valid JSON                                     │      8 │
+2. │ result_group not in (Pass, Conditional Pass, Fail) │      8 │
+3. │ violation_count out of range                       │      8 │
+   └────────────────────────────────────────────────────┴────────┘
+
+:) SELECT result_group, count() AS inspections FROM food.inspection_events GROUP BY result_group ORDER BY inspections DESC
+   ┌─result_group─────┬─inspections─┐
+1. │ Pass             │        2402 │
+2. │ Fail             │         745 │
+3. │ Conditional Pass │         500 │
+   └──────────────────┴─────────────┘
+

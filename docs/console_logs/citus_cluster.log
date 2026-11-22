@@ -1,0 +1,22 @@
+$ psql -p 5440 -d foodsafety_citus
+SELECT nodeid, nodename, nodeport, noderole, isactive FROM pg_dist_node ORDER BY nodeid;
+ nodeid | nodename  | nodeport | noderole | isactive 
+--------+-----------+----------+----------+----------
+      1 | localhost |     5440 | primary  | t
+      2 | localhost |     5441 | primary  | t
+      3 | localhost |     5442 | primary  | t
+(3 rows)
+
+SELECT table_name, citus_table_type, distribution_column, shard_count, table_size FROM citus_tables ORDER BY citus_table_type, table_name LIMIT 8;
+           table_name            | citus_table_type | distribution_column | shard_count | table_size 
+---------------------------------+------------------+---------------------+-------------+------------
+ bench.fact_61737_facility_key   | distributed      | facility_key        |          32 | 10 MB
+ bench.fact_100000_facility_key  | distributed      | facility_key        |          32 | 14 MB
+ bench.fact_500000_facility_key  | distributed      | facility_key        |          32 | 51 MB
+ bench.fact_1000000_facility_key | distributed      | facility_key        |          32 | 97 MB
+ bench.fact_2000000_facility_key | distributed      | facility_key        |          32 | 189 MB
+ bench.fact_1000000_location_key | distributed      | location_key        |          32 | 96 MB
+ bench.fact_1000000_date_key     | distributed      | date_key            |          32 | 97 MB
+ dw.dim_date                     | reference        | <none>              |           1 | 480 kB
+(8 rows)
+

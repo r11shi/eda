@@ -24,25 +24,28 @@ ROOT = Path(__file__).resolve().parents[1]
 # ----------------------------------------------------------------------------- edit before submission
 INSTITUTE = "MIT Academy of Engineering"
 AFFILIATION = "(An Autonomous Institute Affiliated to Savitribai Phule Pune University)"
-DEPARTMENT = "______________________"
+DEPARTMENT = "Computer Engineering"
 COURSE = "Data Analytics (MDM)"
-GUIDE = "______________________"
+GUIDE = "Mrs. Shubhangi Kale"
 YEAR = "2026-27"
 TITLE = "Food Safety and Restaurant Inspection Analytics"
 SUBTITLE = "Data Warehousing, OLAP and Data Mining on Chicago Food Inspections"
-STUDENTS = [("Rushikesh Maddewad", "202502040037", "353")]
+STUDENTS = [("Omkar Patil", "202502040010"), ("Aryan Tandale", "202502040013"), ("Rushikesh Maddewad", "202502040037"), ("Vishwaraj Savairam", "202502040035")]
+PLATFORM = "one Windows 11 laptop running WSL 2 Ubuntu 26.04 (12 logical CPUs, 8 GB memory for WSL) with PostgreSQL 18.6, Citus 14.3, Kafka 3.9, Spark 4.0.1, ClickHouse 26.3 and Grafana 11.3"
 # -----------------------------------------------------------------------------------------------------
 R, IMG, LOGS = ROOT / "results", ROOT / "docs" / "images", ROOT / "docs" / "console_logs"
+SHOTS = IMG / "screens"
 SLIDES_DIR = ROOT / "docs" / "slides"
 OUT_DOCX = ROOT / "docs" / "Food_Safety_Analytics_Report.docx"
-FONT, CODE_FONT = "Times New Roman", "Courier New"
-INK, NAVY, CLAY, STONE = RGBColor(0x1A, 0x1F, 0x2E), RGBColor(0x1F, 0x38, 0x64), RGBColor(0x1F, 0x4E, 0x9C), RGBColor(0x59, 0x63, 0x75)
+FONT, HEAD_FONT, CODE_FONT = "Calibri", "Cambria", "Courier New"
+INK, NAVY, CLAY, STONE = RGBColor(0x1B, 0x24, 0x28), RGBColor(0x0E, 0x3B, 0x43), RGBColor(0x0E, 0x7C, 0x66), RGBColor(0x5B, 0x6B, 0x70)
+DARK, TINT, LINE = "0E3B43", "EEF4F3", "C9D9D6"
 rd = lambda n: pd.read_csv(R / f"{n}.csv")
 AQ = lambda n: pd.read_csv(R / "analytical_query_results" / f"{n}.csv")
 
 # ----------------------------------------------------------------------------- data from the pipeline
-audit, val, mc, mcq, qt, idx, fault, inc, lt = (rd("load_audit").set_index("batch_id"), rd("validation_results"), rd("model_comparison").set_index("criterion"), rd("model_comparison_queries"),
-                                                 rd("batch_query_timing"), rd("indexing_effect"), rd("fault_test"), rd("incremental_load_demo"), rd("batch_load_timing_all"))
+audit, val, mc, mcq, qt, idx, inc, lt = (rd("load_audit").set_index("batch_id"), rd("validation_results"), rd("model_comparison").set_index("criterion"), rd("model_comparison_queries"),
+                                          rd("batch_query_timing"), rd("indexing_effect"), rd("incremental_load_demo"), rd("batch_load_timing_all"))
 reg, coef, rules, dtm, imp, paths = (rd("regression_metrics").set_index("Model"), rd("regression_top_coefficients"), rd("association_rules_selected"), rd("decision_tree_metrics").set_index("Model"),
                                      rd("decision_tree_importance"), rd("decision_tree_paths"))
 ds, cs, dkey, cload, cres, sm = rd("distributed_scaling"), rd("centralized_scaling"), rd("distribution_key_analysis"), rd("citus_load_times"), rd("citus_resources"), rd("streaming_metrics").set_index("metric")["value"]
@@ -76,6 +79,7 @@ multi, base, simple = reg.loc["Multiple LR: all test inspections"], reg.loc["Bas
 tree5, treeT = dtm.loc["Decision tree, threshold 0.5"], dtm.loc["Decision tree, validation-optimal threshold"]
 fast, slow, tot = int((ds.distributed_over_centralized < 0.85).sum()), int((ds.distributed_over_centralized > 1.15).sum()), len(ds)
 LAT, P95 = sm["latency avg (ms), emit -> ClickHouse"], sm["latency p95 (ms)"]
+CHQ = sm[[k for k in sm.index if k.startswith("ClickHouse query")]]
 N_RAW, N_FACT, N_NOT = 73630, 61737, 11864
 
 # ----------------------------------------------------------------------------- document helpers
@@ -121,8 +125,8 @@ def setup():
     st = doc.styles
     set_font(st["Normal"], 11)
     st["Normal"].paragraph_format.space_after = Pt(6); st["Normal"].paragraph_format.line_spacing = 1.12
-    for name, size, before, after in (("Heading 1", 17, 0, 10), ("Heading 2", 13, 12, 5), ("Heading 3", 11.5, 8, 3)):
-        h = st[name]; set_font(h, size, True, False, NAVY)
+    for name, size, before, after in (("Heading 1", 22, 0, 12), ("Heading 2", 14, 14, 5), ("Heading 3", 12, 8, 3)):
+        h = st[name]; set_font(h, size, True, False, CLAY if name == "Heading 2" else NAVY, HEAD_FONT)
         h.paragraph_format.space_before = Pt(before); h.paragraph_format.space_after = Pt(after); h.paragraph_format.keep_with_next = True
     for name, size in (("CodeLine", 7), ("Console", 7.6)):
         from docx.enum.style import WD_STYLE_TYPE
@@ -149,11 +153,11 @@ def header_footer():
     hp = s.header.paragraphs[0]; hp.paragraph_format.tab_stops.add_tab_stop(width, WD_TAB_ALIGNMENT.RIGHT)
     for txt in (INSTITUTE, "\t", f"{TITLE}  ·  {COURSE}"):
         r = hp.add_run(txt); set_font(r, 9, color=STONE)
-    border(hp, ("bottom",), "B8C2D6", 4, 3)
+    border(hp, ("bottom",), LINE, 4, 3)
     fp = s.footer.paragraphs[0]; fp.paragraph_format.tab_stops.add_tab_stop(width, WD_TAB_ALIGNMENT.RIGHT)
-    r = fp.add_run(f"Department of {DEPARTMENT}  ·  {YEAR}\tPage "); set_font(r, 9, color=STONE)
+    r = fp.add_run(f"Group project  ·  {COURSE}  ·  {YEAR}\tPage "); set_font(r, 9, color=STONE)
     fld(fp, "PAGE"); r = fp.add_run(" of "); set_font(r, 9, color=STONE); fld(fp, "NUMPAGES")
-    border(fp, ("top",), "B8C2D6", 4, 3)
+    border(fp, ("top",), LINE, 4, 3)
 
 
 def rich(par, text, size=None, color=None, italic=False):
@@ -185,10 +189,16 @@ def bullets(items):
 
 
 def h1(text, page_break=True):
+    m = re.match(r"^(\d+) ", text)
+    if m:
+        k = doc.add_paragraph(); k.paragraph_format.space_after = Pt(0); k.paragraph_format.keep_with_next = True
+        if page_break:
+            k.paragraph_format.page_break_before = True; page_break = False
+        r = k.add_run(f"CHAPTER {m.group(1)}"); set_font(r, 10.5, True, color=CLAY)
     p = doc.add_heading(text, 1)
     if page_break:
         p.paragraph_format.page_break_before = True
-    border(p, ("bottom",), "1F3864", 8, 4)
+    border(p, ("bottom",), "0E7C66", 12, 6)
     HEADS.append((1, text))
 
 
@@ -216,6 +226,15 @@ def figure(path, text, width=6.3):
     caption("Figure", text)
 
 
+def screen(name, text, width=6.3):
+    """A real output screenshot (docs/images/screens/<name>.png, made by build_docs/make_screenshots.py)."""
+    path = SHOTS / f"{name}.png"
+    if path.exists():
+        from PIL import Image
+        w, h = Image.open(path).size
+        figure(path, "Output screenshot: " + text, min(width, 8.2 * w / h))      # keep tall pages on one page
+
+
 def table(df, widths, text, size=9, align=None, header=True):
     caption("Table", text)
     rows = [list(map(str, df.columns))] + [[("" if (isinstance(v, float) and pd.isna(v)) else str(v)) for v in r] for r in df.values] if header else [[str(v) for v in r] for r in df.values]
@@ -225,7 +244,7 @@ def table(df, widths, text, size=9, align=None, header=True):
     for j, wd in enumerate(widths):
         t.columns[j].width = Inches(6.77 * wd / sum(widths))
     for side in ("top", "bottom", "insideH"):
-        e = OxmlElement(f"w:{side}"); e.set(qn("w:val"), "single"); e.set(qn("w:sz"), "4"); e.set(qn("w:color"), "B8C2D6"); b.append(e)
+        e = OxmlElement(f"w:{side}"); e.set(qn("w:val"), "single"); e.set(qn("w:sz"), "4"); e.set(qn("w:color"), LINE); b.append(e)
     tblPr.append(b)
     total = sum(widths); usable = 6.77
     for i, row in enumerate(rows):
@@ -238,18 +257,20 @@ def table(df, widths, text, size=9, align=None, header=True):
             par = c.paragraphs[0]; par.paragraph_format.space_after = Pt(1); par.paragraph_format.space_before = Pt(1); par.paragraph_format.line_spacing = 1.0
             is_head = header and i == 0
             r = par.add_run(val); set_font(r, size, bool(is_head), None, RGBColor(255, 255, 255) if is_head else INK)
+            if not is_head and i % 2 == 0:
+                shade(c, TINT)
             if align and not is_head and align[j] == "r":
                 par.alignment = WD_ALIGN_PARAGRAPH.RIGHT
             if is_head:
-                shade(c, "1F3864")
+                shade(c, DARK)
     doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
 
-def callout(title, text, fill="FFF4D6"):
+def callout(title, text, fill="EAF2F1"):
     t = doc.add_table(rows=1, cols=1); t.alignment = WD_TABLE_ALIGNMENT.CENTER
     c = t.rows[0].cells[0]; shade(c, fill)
     tcPr = c._tc.get_or_add_tcPr(); bd = OxmlElement("w:tcBorders")
-    for side, col, sz in (("left", "E0A800", 24), ("top", "EBDDA8", 4), ("bottom", "EBDDA8", 4), ("right", "EBDDA8", 4)):
+    for side, col, sz in (("left", "BFD8D2", 6), ("top", "BFD8D2", 6), ("bottom", "BFD8D2", 6), ("right", "BFD8D2", 6)):
         e = OxmlElement(f"w:{side}"); e.set(qn("w:val"), "single"); e.set(qn("w:sz"), str(sz)); e.set(qn("w:color"), col); bd.append(e)
     tcPr.append(bd)
     p = c.paragraphs[0]; p.paragraph_format.space_after = Pt(0)
@@ -277,7 +298,7 @@ def console(title, text, max_lines=34, width=112):
     if len(lines) > max_lines:
         lines = lines[:max_lines - 1] + [f"... ({len(lines) - max_lines + 1} more lines in the log file)"]
     for i, l in enumerate(lines):
-        q = doc.add_paragraph(style="Console"); q.add_run(l if l else " "); shade(q, "F1F4F9")
+        q = doc.add_paragraph(style="Console"); q.add_run(l if l else " "); shade(q, "F1F5F4")
         q.paragraph_format.left_indent = Inches(0.05)
     doc.add_paragraph().paragraph_format.space_after = Pt(3)
 
@@ -314,24 +335,30 @@ def cover():
         p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.add_run().add_picture(str(logo), width=Inches(3.1))
     else:
         P(AFFILIATION, 9, WD_ALIGN_PARAGRAPH.CENTER, 8, STONE, True)
-    P(f"**DEPARTMENT OF {DEPARTMENT}**", 12, WD_ALIGN_PARAGRAPH.CENTER, 26)
-    P("A PROJECT REPORT ON", 10.5, WD_ALIGN_PARAGRAPH.CENTER, 12, STONE)
-    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.space_after = Pt(4)
-    r = p.add_run(TITLE); set_font(r, 28, True, color=NAVY)
-    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.space_after = Pt(22)
-    r = p.add_run(SUBTITLE); set_font(r, 13, True, False, CLAY)
+    P("TY B.Tech  ·  Integrated Data Warehouse, OLAP and Data Mining Project", 10.5, WD_ALIGN_PARAGRAPH.CENTER, 14, CLAY)
+    band = doc.add_table(rows=1, cols=1); band.alignment = WD_TABLE_ALIGNMENT.CENTER
+    c = band.rows[0].cells[0]; c.width = Inches(6.77); shade(c, DARK)
+    for txt_, size, col, bold, after in (("A PROJECT REPORT ON", 10, RGBColor(0xE9, 0xA2, 0x3B), True, 8), (TITLE, 28, RGBColor(255, 255, 255), True, 8),
+                                         (SUBTITLE, 13, RGBColor(0xCF, 0xE6, 0xE1), False, 4)):
+        q = c.paragraphs[0] if txt_ == "A PROJECT REPORT ON" else c.add_paragraph()
+        q.alignment = WD_ALIGN_PARAGRAPH.CENTER; q.paragraph_format.space_after = Pt(after); q.paragraph_format.space_before = Pt(14 if txt_ == "A PROJECT REPORT ON" else 0)
+        r = q.add_run(txt_); set_font(r, size, bold, False, col, HEAD_FONT if size > 20 else FONT)
+    c.paragraphs[-1].paragraph_format.space_after = Pt(16)
+    P("", after=10)
     P("Submitted in partial fulfilment of the requirements of the course", 10.5, WD_ALIGN_PARAGRAPH.CENTER, 4)
-    P(f"**{COURSE}**", 14, WD_ALIGN_PARAGRAPH.CENTER, 22)
-    P("**SUBMITTED BY**", 10.5, WD_ALIGN_PARAGRAPH.CENTER, 6)
-    t = doc.add_table(rows=1 + len(STUDENTS), cols=4); t.alignment = WD_TABLE_ALIGNMENT.CENTER
-    for j, (hd, wd) in enumerate((("Sr. No.", 0.7), ("Name of student", 3.2), ("PRN", 1.6), ("Roll No", 1.0))):
-        c = t.rows[0].cells[j]; c.width = Inches(wd); shade(c, "1F3864"); r = c.paragraphs[0].add_run(hd); set_font(r, 10, True, color=RGBColor(255, 255, 255))
-    for i, (n, prn, roll) in enumerate(STUDENTS, 1):
-        for j, v in enumerate((str(i), n, prn, roll)):
-            c = t.rows[i].cells[j]; c.width = Inches((0.7, 3.2, 1.6, 1.0)[j]); r = c.paragraphs[0].add_run(v); set_font(r, 10.5)
+    P(f"**{COURSE}**", 14, WD_ALIGN_PARAGRAPH.CENTER, 18)
+    P("**SUBMITTED BY**", 10.5, WD_ALIGN_PARAGRAPH.CENTER, 6, CLAY)
+    t = doc.add_table(rows=1 + len(STUDENTS), cols=3); t.alignment = WD_TABLE_ALIGNMENT.CENTER
+    for j, (hd, wd) in enumerate((("Sr. No.", 0.8), ("Name of student", 3.4), ("PRN", 1.9))):
+        c = t.rows[0].cells[j]; c.width = Inches(wd); shade(c, DARK); r = c.paragraphs[0].add_run(hd); set_font(r, 10, True, color=RGBColor(255, 255, 255))
+    for i, (n, prn) in enumerate(STUDENTS, 1):
+        for j, v in enumerate((str(i), n, prn)):
+            c = t.rows[i].cells[j]; c.width = Inches((0.8, 3.4, 1.9)[j]); r = c.paragraphs[0].add_run(v); set_font(r, 11, j == 1)
+            if i % 2 == 0: shade(c, TINT)
     P("", after=14)
     P("Under the guidance of", 10.5, WD_ALIGN_PARAGRAPH.CENTER, 2)
-    P(f"**Prof. {GUIDE}**", 12, WD_ALIGN_PARAGRAPH.CENTER, 18)
+    P(f"**{GUIDE}**", 12, WD_ALIGN_PARAGRAPH.CENTER, 18)
+    P(f"Department of {DEPARTMENT}", 10.5, WD_ALIGN_PARAGRAPH.CENTER, 6, STONE)
     P(f"**Academic Year {YEAR}**", 11, WD_ALIGN_PARAGRAPH.CENTER, 14)
     P("All numbers in this report come from the files in `results/`, which `python run_all.py` regenerates from the data in `data/raw/`.", 9, WD_ALIGN_PARAGRAPH.CENTER, 0, STONE, True)
 
@@ -341,19 +368,21 @@ TOC_SOURCE = []
 
 def front_matter(toc_pages):
     doc.add_page_break()
-    p = doc.add_heading("Declaration", 1); border(p, ("bottom",), "1F3864", 8, 4)
+    p = doc.add_heading("Declaration", 1); border(p, ("bottom",), "0E7C66", 12, 6)
     P(f"We hereby declare that the project report entitled **\"{TITLE}: {SUBTITLE}\"** submitted for the course **{COURSE}** is our own work. The data pipeline, analysis, "
-      "results and documentation have been prepared by the student listed below. External sources, libraries and data providers are acknowledged in the References section. "
+      "results and documentation have been prepared jointly by the students listed below. External sources, libraries and data providers are acknowledged in the References section. "
       "This work has not been submitted elsewhere for any other course or degree.")
     P("The data are public records published by the City of Chicago. Results describe those records; they are not a statement about any individual establishment.")
-    t = doc.add_table(rows=2, cols=2); t.alignment = WD_TABLE_ALIGNMENT.CENTER
-    for j, hd in enumerate(("Name of student", "Signature")):
-        r = t.rows[0].cells[j].paragraphs[0].add_run(hd); set_font(r, 10, True, color=RGBColor(255, 255, 255)); shade(t.rows[0].cells[j], "1F3864")
-    r = t.rows[1].cells[0].paragraphs[0].add_run("\n".join(s[0] for s in STUDENTS) + "\n"); set_font(r, 10.5)
+    t = doc.add_table(rows=1 + len(STUDENTS), cols=3); t.alignment = WD_TABLE_ALIGNMENT.CENTER
+    for j, hd in enumerate(("Name of student", "PRN", "Signature")):
+        r = t.rows[0].cells[j].paragraphs[0].add_run(hd); set_font(r, 10, True, color=RGBColor(255, 255, 255)); shade(t.rows[0].cells[j], DARK)
+    for i, (n, prn) in enumerate(STUDENTS, 1):
+        for j, v in enumerate((n, prn, "")):
+            r = t.rows[i].cells[j].paragraphs[0].add_run(v); set_font(r, 10.5); t.rows[i].cells[j].paragraphs[0].paragraph_format.space_after = Pt(12)
     P("", after=6); P("Place: ____________________"); P("Date: _____________________")
 
     doc.add_page_break()
-    p = doc.add_heading("Abstract", 1); border(p, ("bottom",), "1F3864", 8, 4)
+    p = doc.add_heading("Abstract", 1); border(p, ("bottom",), "0E7C66", 12, 6)
     P(f"This report presents an end-to-end data analytics project on restaurant and food-establishment inspections in Chicago. The City of Chicago publishes one record for every inspection. "
       f"The project integrates the {N_RAW:,} records of 2022 to 2025 into a PostgreSQL star schema with two fact tables, builds the same data as a distributed warehouse (Citus) and as a real-time warehouse "
       f"(Kafka, Spark Structured Streaming, ClickHouse, Grafana), measures the three architectures, analyses the warehouse with OLAP operations and ten business questions, and mines it with regression, "
@@ -370,7 +399,7 @@ def front_matter(toc_pages):
     P("**Keywords:** data warehouse, star schema, fact constellation, PostgreSQL, Citus, Kafka, Spark Structured Streaming, ClickHouse, OLAP, regression, association rules, Apriori, FP-Growth, decision tree, food safety.", 10.5)
 
     doc.add_page_break()
-    p = doc.add_heading("Table of Contents", 1); border(p, ("bottom",), "1F3864", 8, 4)
+    p = doc.add_heading("Table of Contents", 1); border(p, ("bottom",), "0E7C66", 12, 6)
     width = Emu(doc.sections[0].page_width - doc.sections[0].left_margin - doc.sections[0].right_margin)
     for level, text in [(1, "Declaration"), (1, "Abstract")] + TOC_SOURCE:
         pg = toc_pages.get(text, "")
@@ -419,7 +448,7 @@ def chapter1():
     table(rows, [0.5, 2.2, 2.5, 2.4], "Mapping of project parts to implementation and evidence", 9, ["l", "l", "l", "l"])
     h2("1.4 Organisation of the report")
     P("Chapter 2 states the problem, research questions and scope. Chapter 3 describes the dataset and the targets. Chapter 4 presents the architecture and the warehouse design. "
-      "Chapter 5 explains every processing stage with its console output, tables and figures. Chapter 6 discusses the findings and answers the research questions. "
+      "Chapter 5 explains every processing stage with its console output, tables and figures, and ends with how the project is run and monitored. Chapter 6 discusses the findings and answers the research questions. "
       "Chapter 7 maps the requirements to the work. Chapter 8 reproduces key source code, chapter 9 the presentation slides, and chapter 10 states limitations, conclusions and future work.")
 
 
@@ -440,7 +469,7 @@ def chapter2():
     h2("2.3 Objectives")
     bullets(["**O1.** Download and document the official data, profile it and clean it with every decision logged.",
              "**O2.** Design a dimensional model (star, snowflake, fact constellation), build it and compare the designs by measurement.",
-             "**O3.** Build a batch warehouse with a reproducible ETL, an initial and an incremental load, validation checks, indexing and a failed-load test.",
+             "**O3.** Build a batch warehouse with an ETL, an initial and an incremental load, validation checks and indexes.",
              "**O4.** Build a distributed warehouse (Citus) and a real-time warehouse (Kafka, Spark, ClickHouse, Grafana) on the same data and measure them.",
              "**O5.** Demonstrate OLAP operations: roll-up, drill-down, slice, dice, pivot, CUBE and GROUPING SETS, and answer ten business questions.",
              "**O6.** Fit regression models, mine association rules with Apriori and FP-Growth, and train and interpret a decision tree.",
@@ -451,7 +480,7 @@ def chapter2():
              "**Population:** completed inspections (Pass, Pass with Conditions, Fail). Visits that did not take place are kept in staging but are not facts.",
              "**Prediction rule:** only information available before the inspection is used. History features come from strictly earlier inspections of the same licensed establishment.",
              "**Validation:** time-based, never random. Regression trains on 2022 to 2024 and tests on 2025; the tree trains on 2022 and 2023, selects settings on 2024 and is tested once on 2025.",
-             "**Machine:** every timing was measured on one four-core Linux machine. Timings compare designs under equal conditions; they are not production capacity.",
+             f"**Machine:** every timing was measured on {PLATFORM}. Timings compare designs under equal conditions; they are not production capacity.",
              "**Scope limit:** the deliverable is a reproducible analytical pipeline, not a production scheduling system."])
 
 
@@ -501,6 +530,8 @@ def chapter4():
       "A second fact table has the grain facility by year and shares the facility dimension. Two fact tables sharing dimensions make a fact constellation. "
       "Every dimension contains an Unknown member with key 0, so a lookup that finds nothing never drops a fact row.", keep=True)
     figure(IMG / "fact_constellation.png", "Fact constellation: FactInspection and FactFacilityAnnualInspectionPerformance share DimFacility", 5.8)
+    screen("psql_tables", "the tables of the warehouse schema dw in PostgreSQL", 6.3)
+    screen("psql_fact", "rows of the fact table: only keys and measures", 6.3)
     inc2 = inc.set_index("object")["after_incremental"]
     tc = pd.DataFrame([("fact_inspection", "inspection_id, date_key, facility_key, ... (grain: one inspection)", f"{int(inc2['fact_inspection']):,}"),
                        ("fact_facility_annual_inspection_performance", "facility_key, reporting_year (grain: facility x year)", f"{int(inc2['fact_facility_annual']):,}"),
@@ -521,41 +552,49 @@ def chapter4():
     cmp_ = mc.reset_index(); cmp_.columns = ["Criterion", "Star", "Snowflake", "Fact constellation"]
     for c in ("Star", "Snowflake", "Fact constellation"):
         cmp_[c] = cmp_[c].map(lambda v: f"{v:g}")
-    table(cmp_, [3.6, 1.0, 1.1, 1.4], "Measured comparison of the three designs (PostgreSQL 16, median times)", 9, ["l", "r", "r", "r"])
-    P("The snowflake is about twice as slow on the main question (78 ms against 37 ms) and needs 9 joins instead of 3, and it saves only 0.9 MB of dimension storage. "
-      "The second fact answers the facility-by-year question in 2.7 ms instead of 21.7 ms, so the constellation was selected.")
+    table(cmp_, [3.6, 1.0, 1.1, 1.4], "Measured comparison of the three designs (median times)", 9, ["l", "r", "r", "r"])
+    screen("model_comparison", "etl/model_comparison.py comparing star, snowflake and fact constellation", 6.3)
+    qa_s, qa_f = mcq.iloc[0]["star_ms"], mcq.iloc[0]["snowflake_ms"]; fy = mc.loc["Facility x year question: median time (ms)"]
+    st_ = rd("model_storage"); saved = (st_.iloc[0]["dimension_bytes"] - st_.iloc[1]["dimension_bytes"]) / 1048576
+    P(f"The snowflake is {qa_f / qa_s:.1f} times as slow on the main question ({qa_f:.0f} ms against {qa_s:.0f} ms) and needs 9 joins instead of 3, and it saves only {saved:.1f} MB of dimension storage. "
+      f"The second fact answers the facility-by-year question in {fy['fact_constellation']:.1f} ms instead of {fy['star']:.1f} ms, so the constellation was selected.")
     h2("4.5 Integrity checks")
-    P("After every load the warehouse is checked with 16 queries (`sql/04_validation.sql`): orphan keys for every dimension, duplicate inspection ids, differences between staging and the facts, and reconciliation of the annual fact. Every check must return zero.", keep=True)
+    P("After every load the warehouse is checked with five queries (`sql/04_validation.sql`): fact rows whose key is missing in a dimension, duplicate inspection ids, completed rows that did not reach the fact table, the total of violations in staging and in the fact table, and the agreement of the two fact tables. Every check must return zero.", keep=True)
     v = val[val["stage"] == "after incremental load"][["check_name", "value"]].copy(); v["value"] = v["value"].map(lambda x: f"{int(x):,}"); v["Expected"] = "0"
     table(v.rename(columns={"check_name": "Check", "value": "Observed"}), [4.6, 1.0, 0.9], "Warehouse integrity results after the incremental load", 8.5, ["l", "r", "r"])
+    screen("psql_checks", "the five checks run in psql after the incremental load", 6.3)
 
 
 def chapter5():
     state["chap"] = 5; state["tab"] = state["fig"] = 0
     h1("5 Methodology and Implementation")
-    P("This chapter follows the execution order of the project. Each stage states what it does and why, shows the console output that was captured when the scripts ran (`docs/console_logs/`), "
-      "reproduces the main tables and figures, and ends with an interpretation.")
+    P("This chapter follows the execution order of the project. Each stage states what it does and why, shows screenshots of the real output captured when the scripts ran, "
+      "reproduces the main tables and figures, and ends with an interpretation. The whole batch part is started with one command:", keep=True)
+    screen("run_all", "python run_all.py starting the pipeline (first steps)", 6.3)
     h2("5.1 Stage 1: data acquisition and curation")
     P("`scripts/fetch_data.py` downloads the records (or `run_all.py` unpacks the bundled file). Notebook `01_data_curation` profiles the raw file, applies the rules in `etl/curation.py` and saves the curated data. "
       "The rules are ordered: text is trimmed, dates and coordinates are typed, repeated reports are removed, invalid codes are mapped to Unknown, the facility identity is built from the licence (or name and address when the licence is missing), "
       "and the attributes used later are derived: violation count and band, result group, risk group, facility group, inspection type group, season and the area of the city (the quadrant of the Chicago street grid, not an official community area). "
       "Section 3.5 lists the decisions. Row counts reconcile before and after curation.")
+    figure(IMG / "nb_02_eda_3.png", "Exploratory analysis (notebook 02): inspections per year, per quarter and per month", 6.5)
+    figure(IMG / "nb_02_eda_5.png", "Exploratory analysis: inspection volume versus fail rate by facility group", 6.5)
     h2("5.2 Stage 2: batch warehouse, ETL and validation")
-    P("`etl/run_etl.py all` creates the schema, loads January 2022 to November 2025 as batch 1, validates, loads December 2025 as the incremental batch 2, validates, loads December 2025 again as batch 3 to test idempotency and validates once more.")
-    console("etl/run_etl.py all", (LOGS / "run_etl.log").read_text(encoding="utf-8"), 22)
+    P("`etl/run_etl.py all` creates the schema, loads January 2022 to November 2025 as batch 1 (the initial load), runs the checks, loads December 2025 as batch 2 (the incremental load) and runs the checks again.", keep=True)
+    screen("etl", "etl/run_etl.py: initial load, incremental load and checks", 6.5)
     a = audit.reset_index()[["batch_id", "batch_label", "rows_staged", "rows_rejected", "rows_not_completed", "rows_loaded_fact", "new_facilities"]]
     table(a.rename(columns={"batch_id": "Batch", "batch_label": "Label", "rows_staged": "Staged", "rows_rejected": "Rejected", "rows_not_completed": "Not completed", "rows_loaded_fact": "Facts loaded", "new_facilities": "New facilities"}),
-          [0.5, 2.6, 0.8, 0.8, 0.9, 0.8, 0.8], "Load audit of the three batches", 8.5, ["l", "l", "r", "r", "r", "r", "r"])
-    P(f"Batch 1 loads {int(audit.loc[1, 'rows_loaded_fact']):,} facts; its staging, rules and loading take about ten seconds including the indexes. Batch 2 adds {int(audit.loc[2, 'rows_loaded_fact']):,} facts and {int(audit.loc[2, 'new_facilities'])} new facilities in under a second "
-      f"without changing the rows of batch 1, which an MD5 checksum over those rows confirms. Batch 3 stages the same {int(audit.loc[3, 'rows_staged']):,} rows again: {int(audit.loc[3, 'rows_rejected']):,} are rejected because their inspection id is already in the fact table, and none is loaded.")
-    h3("Failed-load (atomicity) test")
-    P("`etl/fault_test.py` runs a load that fails in the middle: a value that does not fit its column, after new dimension members were inserted. All four warehouse tables are unchanged afterwards.", keep=True)
-    console("etl/fault_test.py", (LOGS / "fault_test.log").read_text(encoding="utf-8"), 10)
+          [0.5, 2.6, 0.8, 0.8, 0.9, 0.8, 0.8], "Load audit of the two batches", 8.5, ["l", "l", "r", "r", "r", "r", "r"])
+    P(f"Batch 1 loads {int(audit.loc[1, 'rows_loaded_fact']):,} facts. Batch 2 adds {int(audit.loc[2, 'rows_loaded_fact']):,} facts and {int(audit.loc[2, 'new_facilities'])} new facilities in about a second, "
+      "so the warehouse grows month by month without being rebuilt. Visits that did not take place stay in staging and are counted in the audit as not completed.")
+    screen("psql_load_audit", "the load audit table in PostgreSQL", 6.5)
     h3("Indexing and query timing")
     table(idx[["query", "stage", "median_ms"]].rename(columns={"query": "Query", "stage": "Index", "median_ms": "Median (ms)"}), [3.8, 1.2, 1.0], "Effect of indexes on selective queries", 9, ["l", "l", "r"])
+    screen("queries", "etl/run_queries.py: the business questions and the effect of the indexes", 6.5)
     table(qt[["query", "description", "result_rows", "median_ms"]].assign(description=lambda d: d["description"].str.replace(r" \(rule-level.*", "", regex=True)).rename(columns={"query": "ID", "description": "Business question", "result_rows": "Rows", "median_ms": "Median (ms)"}),
           [0.6, 4.4, 0.7, 1.0], "The analytical queries Q1 to Q8: result rows and median time", 8.5, ["l", "l", "r", "r"])
-    P("Indexes created after the bulk load take selective queries from 3 to 5 ms to 0.2 to 0.3 ms. The business queries run in 10 to 74 ms. In the scale test of Part D, two million rows (32 times the real data) still answered in 174 to 269 ms on one node.")
+    wo, wi = idx[idx["stage"] == "without index"]["median_ms"], idx[idx["stage"] == "with index"]["median_ms"]; c2m = cs[cs["rows"] == 2000000]["centralized_ms"]
+    P(f"Indexes created after the bulk load take selective queries from {wo.min():.1f} to {wo.max():.1f} ms down to {wi.min():.1f} to {wi.max():.1f} ms. The business queries run in {qt['median_ms'].min():.0f} to {qt['median_ms'].max():.0f} ms. "
+      f"In the scale test of Part D, two million rows (32 times the real data) still answered in {c2m.min():.0f} to {c2m.max():.0f} ms on one node.")
     h2("5.3 Stage 3: OLAP analysis")
     P("`etl/run_olap.py` runs the OLAP operations written in `sql/07_olap_queries.sql` and writes `docs/olap_operations.md` with the question, the SQL, the output and an interpretation for each. "
       "Roll-up uses `GROUP BY ROLLUP`, CUBE and GROUPING SETS use the SQL standard constructs, and pivot uses conditional counts.")
@@ -565,6 +604,10 @@ def chapter5():
         d = o["df"].copy()
         table(d, [1] * len(d.columns), f"{o['title']}: output", 8.5, ["l"] + ["r"] * (len(d.columns) - 1))
         P(o["interp"].replace("`", ""))
+    screen("psql_star_query", "a star-schema query: fail rate by facility group", 6.0)
+    screen("psql_rollup", "roll-up from quarters to years with GROUP BY ROLLUP", 6.0)
+    screen("psql_slice_dice", "dice: 2025 and high-risk facilities, by inspection type", 6.0)
+    screen("psql_pivot", "pivot: one column per result", 6.0)
     h2("5.4 Stage 4: exploratory analysis and ten findings")
     P("Notebook `02_eda` analyses the curated data numerically, by category, over time and by place. The business queries and the ten findings in `docs/ten_findings.md` use the warehouse. The findings are:", keep=True)
     for n, t in FINDINGS:
@@ -581,6 +624,9 @@ def chapter5():
       "against 0.248 on the training years, so most of the variation is not explained by what is known before the visit. The largest coefficients belong to ZIP codes 60617, 60633, 60620, 60636 and 60628.")
     P("**Diagnostics** (from the notebook): only 5 of 102 columns have a variance inflation factor above 5, so collinearity is not a problem. The Breusch-Pagan test rejects constant error variance. "
       "1.9% of 2025 inspections have more than 14 violations and cause 25% of the squared error. The linear model predicts a negative count 304 times out of 15,919, which a Poisson regression would avoid; it is the natural next step.")
+    screen("jupyter_07", "notebook 07 (regression) open in JupyterLab", 6.5)
+    screen("psql_mart", "the analytical mart: every inspection carries the result of the previous one", 6.3)
+    figure(IMG / "nb_07_regression_2.png", "Multiple regression on 2025: actual versus predicted, residuals versus predicted and the residual distribution", 6.5)
     cf = coef.copy(); cf["feature"] = cf["feature"].str.replace("cat__", "", regex=False); cf["coefficient"] = cf["coefficient"].round(3)
     table(cf.head(8).rename(columns={"feature": "Feature", "coefficient": "Coefficient"}), [4.0, 1.0], "Largest coefficients of the multiple regression", 9, ["l", "r"])
     h2("5.6 Stage 6: association rule mining")
@@ -591,50 +637,84 @@ def chapter5():
     r = rules[["Rule", "support", "confidence", "lift"]].copy(); r["support"] = r["support"].map(lambda v: f"{v:.1%}"); r["confidence"] = r["confidence"].map(lambda v: f"{v:.0%}"); r["lift"] = r["lift"].map(lambda v: f"{v:.2f}")
     r["Rule"] = r["Rule"].str.replace("  =>  ", " => ", regex=False)
     table(r.rename(columns={"support": "Support", "confidence": "Confidence", "lift": "Lift"}), [4.7, 0.8, 0.9, 0.6], "Selected association rules", 8.5, ["l", "r", "r", "r"])
+    figure(IMG / "nb_08_association_mining_2.png", "All rules with support of at least 2% and confidence of at least 50% (notebook 08)", 5.2)
     P("Low-risk inspections are mostly grocery stores (lift 6.5). An inspection with ten or more violations ends in a fail in 69% of cases, three times the base rate. Licence inspections of restaurants that pass are often completely clean, and clean inspections of high-risk restaurants are often re-inspections, which suggests that follow-ups work. "
       "Lift measures association, not cause; a fail is partly defined by its violations.")
     h2("5.7 Stage 7: decision tree")
     P("Notebook `09_decision_tree` predicts whether an inspection fails. A tree asks at every node the yes/no question that makes the two resulting groups purer; purity is measured by entropy (ID3), gain ratio (C4.5) or the Gini index (CART). "
       "Scikit-learn builds CART trees. Settings were tuned on the 2024 validation year: maximum depth, minimum samples to split, minimum samples per leaf and cost-complexity pruning. The best validation AUC is about 0.636 on a plateau of nearly equal settings; "
       "the simplest of the best was chosen (maximum depth 8, 200 samples to split, 200 per leaf). A fully grown tree reaches a training AUC of 0.995 but a validation AUC of 0.525, which shows why the limits are needed.")
+    figure(IMG / "nb_09_decision_tree_1.png", "Tuning on the 2024 validation year: training versus validation AUC for each setting", 6.6)
     d = dtm.reset_index()[["Model", "threshold", "Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]]
+    d[["Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]] = d[["Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]].astype(float).round(3)
     table(d, [3.1, 0.7, 0.8, 0.8, 0.7, 0.6, 0.7], "Decision tree on the 2025 test year", 9, ["l", "r", "r", "r", "r", "r", "r"])
     P(f"With the default cut-off of 0.5 the tree flags almost nothing (recall {tree5['Recall']:.1%}), because only 21% of inspections fail and the predicted probability rarely exceeds one half. The cut-off chosen on 2024 ({treeT['threshold']}) catches {treeT['Recall']:.0%} of the 2025 failures "
       f"with a precision of {treeT['Precision']:.0%}; accuracy falls to {treeT['Accuracy']:.0%}, below the 79% of the rule that always predicts a pass. Which cut-off is right depends on what a missed failure costs. The AUC of {tree5['ROC-AUC']:.3f} does not depend on the cut-off and shows that the ranking is weak.")
+    figure(IMG / "nb_09_decision_tree_2.png", "Confusion matrices and ROC curve on the 2025 test year", 6.6)
     i2 = imp.copy(); i2.columns = ["Feature", "Importance"]; i2["Importance"] = i2["Importance"].map(lambda v: f"{100 * v:.1f}%")
     table(i2.head(8), [3.4, 1.0], "Most important inputs of the tree", 9, ["l", "r"])
     pt = paths.copy(); pt.columns = ["Path", "Conditions", "n train", "Fail % train", "n 2025", "Fail % 2025"]
     table(pt[["Path", "n train", "Fail % train", "n 2025", "Fail % 2025"]], [1.8, 0.9, 1.1, 0.9, 1.1], "Three leaves of the tree", 9, ["l", "r", "r", "r", "r"])
     P("The past is the best clue: a previous failed inspection, a complaint inspection, the number of earlier violations and the days since the last visit. Highest fail rate: a complaint inspection, no previous failure, more than six earlier violations and a long gap since the last visit (55 to 58%). "
       "Lowest: a quick re-inspection after a failure (4 to 5%), which agrees with the finding that follow-ups work. The tree is weak overall and is a ranking aid, not a decision tool.")
+    figure(IMG / "nb_09_decision_tree_4.png", "The trained decision tree (first three levels)", 6.6)
     h2("5.8 Stage 8: distributed warehouse (Citus)")
-    P("The same warehouse was loaded into a Citus 13.2 cluster on PostgreSQL 16 (a coordinator and two workers on one machine, 32 shards). The fact table is distributed by a key; the five dimensions are reference tables copied to every worker, so every join is local. "
+    P("The same warehouse was loaded into a Citus 14.3 cluster on PostgreSQL 18 (built from source; a coordinator and two workers on one machine, 32 shards). The fact table is distributed by a key; the five dimensions are reference tables copied to every worker, so every join is local. "
       "The key was chosen by simulating the shard assignment with PostgreSQL's integer hash.")
     dk = dkey[["candidate_key", "distinct_values", "largest_single_value_share_%", "shard_skew_max_over_mean"]].rename(columns={"candidate_key": "Candidate key", "distinct_values": "Distinct values", "largest_single_value_share_%": "Largest share %", "shard_skew_max_over_mean": "Shard skew (max/mean)"})
     table(dk, [1.6, 1.3, 1.4, 1.6], "Distribution-key analysis (32 shards, two workers)", 9, ["l", "r", "r", "r"])
     P(f"FacilityKey has the most distinct values and the most even shards, so it was chosen. In {tot} test cases (five queries at 61,737, 100,000, 500,000, 1,000,000 and 2,000,000 rows) the distributed results were identical to the single-node results, "
-      f"but Citus was clearly faster in {fast} and clearly slower in {slow}. The workers shared the same four cores, so there was coordination work and no additional hardware. Row counts above 61,737 are a synthetic scale-up by resampling the real facts, used only to time queries.")
+      f"but Citus was clearly faster in {fast} and clearly slower in {slow}. The workers shared the same CPUs, so there was coordination work and no additional hardware. Row counts above 61,737 are a synthetic scale-up by resampling the real facts, used only to time queries.")
     d2 = ds[ds["rows"] == 2000000][["query", "centralized_ms", "distributed_ms", "distributed_over_centralized"]]
     table(d2.rename(columns={"query": "Query (2,000,000 rows)", "centralized_ms": "One node (ms)", "distributed_ms": "Citus (ms)", "distributed_over_centralized": "Ratio"}), [3.0, 1.0, 1.0, 0.7], "Citus against one PostgreSQL node at 2,000,000 rows", 9, ["l", "r", "r", "r"])
     figure(IMG / "citus_vs_centralized.png", "Ratio of Citus time to single-node time (below 1.0 means Citus is faster)", 6.0)
+    screen("citus_cluster", "the Citus cluster: one coordinator, two workers, distributed and reference tables", 6.5)
+    screen("citus_shards", "the 32 shards are split evenly between the two workers", 6.0)
     h2("5.9 Stage 9: real-time warehouse")
     P("A producer replays historical inspections in date order into the Kafka topic `food_inspections`, with the key set to the inspection id. A Spark Structured Streaming job validates every JSON event with seven rules, derives measures and runs four streaming queries: valid events, rejected events (a dead-letter table with the reason), "
       "10-second windows and daily event-time windows with a one-day watermark. ClickHouse stores the results (MergeTree for events, ReplacingMergeTree for the updated windows) and Grafana refreshes every five seconds. "
       "The official data is a historical file, so this is a **replay simulation**, and every event says so (`source_mode = REPLAY_SIMULATION`).")
     s2 = pd.DataFrame([("Events replayed and stored", f"{int(sm['valid events stored']):,} (each stored once)"), ("Injected malformed events rejected", f"{int(sm['rejected test events'])} of {int(sm['rejected test events'])}"),
                        ("Throughput producer to ClickHouse", f"{int(sm['sustained throughput (events/s, producer to ClickHouse)'])} events per second"),
-                       ("Delay emit to ClickHouse (average / 95th percentile)", f"{LAT:.0f} ms / {P95:.0f} ms"), ("ClickHouse dashboard queries", "5.6 to 7.3 ms"),
+                       ("Delay emit to ClickHouse (average / 95th percentile)", f"{LAT:.0f} ms / {P95:.0f} ms"), ("ClickHouse dashboard queries", f"{CHQ.min():.1f} to {CHQ.max():.1f} ms"),
                        ("Memory of Kafka, ClickHouse, Spark, Grafana", f"{int(sm['memory (RSS, MB): Kafka broker'])}, {int(sm['memory (RSS, MB): ClickHouse server'])}, {int(sm['memory (RSS, MB): Spark streaming job (python + JVM)'])}, {int(sm['memory (RSS, MB): Grafana'])} MB")],
                       columns=["Measure", "Value"])
     table(s2, [3.8, 3.0], "Real-time measurements from the replay", 9, ["l", "l"])
-    figure(IMG / "grafana_realtime_dashboard.png", "Grafana real-time dashboard during the replay", 6.2)
+    screen("stream_producer", "the producer replaying inspections into Kafka", 6.5)
+    screen("stream_clickhouse", "the events stored in ClickHouse and the rejected test events", 6.0)
+    if (SHOTS / "grafana_realtime.png").exists():
+        screen("grafana_realtime", "Grafana real-time dashboard during the replay", 6.4)
+    else:
+        figure(IMG / "grafana_realtime_dashboard.png", "Grafana real-time dashboard during the replay", 6.2)
     h2("5.10 Stage 10: dashboard")
-    P("`dashboard/build_dashboard.py` builds a self-contained HTML dashboard with Plotly directly from the warehouse. It has the four required sections: executive overview, facility and risk, geographic, and inspection and violation. "
-      "Open `dashboard/food_safety_dashboard.html` in any browser. Power BI Desktop runs only on Windows, so no Power BI file was produced; the star-schema tables are exported by `dashboard/export_for_powerbi.py` and rebuild instructions are in `dashboard/powerbi/`.")
-    figure(IMG / "dashboard_exec.png", "Dashboard: executive overview", 6.0)
-    figure(IMG / "dashboard_facility.png", "Dashboard: facility and risk", 6.0)
-    figure(IMG / "dashboard_geo.png", "Dashboard: geographic", 6.0)
-    figure(IMG / "dashboard_insp.png", "Dashboard: inspections and violations", 6.0)
+    P("`dashboard/build_dashboard.py` builds a self-contained HTML dashboard with Plotly directly from the warehouse; it opens with a double-click and needs no server. A side menu leads to six pages: "
+      "the four sections required by the brief (overview, facilities and risk, locations, inspections and violations), a data-mining page with the results of the three models, and a page that summarises the three warehouses. "
+      "Every chart has a title and one line that says what it shows.")
+    for page, label in (("overview", "Overview page: key figures, inspections and fail rate by year, result mix"), ("facility", "Facilities and risk page"),
+                        ("geo", "Locations page: areas, ZIP codes and the map"), ("insp", "Inspections and violations page: types, monthly trend and heat maps"),
+                        ("mining", "Data-mining page: regression, association rules and decision tree"), ("dw", "Warehouses page: batch, distributed and real-time")):
+        screen(f"dashboard_{page}", "dashboard, " + label, 6.3)
+    stage11()
+
+
+def stage11():
+    h2("5.11 Stage 11: running the project and where each part is shown")
+    P(f"All parts were rebuilt from the raw file on {PLATFORM}. Because Windows has no PostgreSQL or Docker on this machine, every server runs inside WSL 2 (the Ubuntu disk lives on drive E:). "
+      "Citus has no package for Ubuntu 26.04 and was compiled from source for PostgreSQL 18. One script, `scripts/run_everything_wsl.sh`, copies the project to the Linux disk and runs it; "
+      "`Start_Project.cmd` starts everything with a double-click after a reboot.", keep=True)
+    runs = pd.DataFrame([("install", "once: Java, Citus, Python packages, Kafka, ClickHouse, Grafana (checksums verified)", "~15 min"),
+                         ("full", "rebuild everything from the raw data: run_all.py, Citus benchmark, streaming replay", "~20 min"),
+                         ("start", "after a reboot: start PostgreSQL, Citus, Kafka, Spark, ClickHouse, Grafana and JupyterLab, and replay the stream", "~3 min"),
+                         ("stop", "stop the streaming services", "seconds")], columns=["Mode", "What it does", "Time"])
+    table(runs, [0.8, 5.0, 0.9], "Modes of scripts/run_everything_wsl.sh", 9, ["l", "l", "r"])
+    P("Each part is demonstrated with the simplest tool that shows it: SQL queries in pgAdmin for the warehouses, the executed notebooks for cleaning and mining, "
+      "the HTML dashboard for Part F and Grafana only for the real-time warehouse. `README.md` (and its web version `README.html`) explains every part in plain language with the commands and their real output.", keep=True)
+    where = pd.DataFrame([("A", "Curation and EDA", "notebooks 01 and 02 (JupyterLab)"), ("B", "Dimensional models", "pgAdmin: schemas dw and snow; results/model_comparison.csv"),
+                          ("C", "Batch warehouse", "pgAdmin: staging.load_audit, sql/04_validation.sql"), ("D", "Distributed (Citus)", "pgAdmin on port 5440: pg_dist_node, citus_tables, citus_shards"),
+                          ("E", "Real-time", "Grafana real-time dashboard; ClickHouse queries"), ("F", "OLAP and dashboard", "pgAdmin: sql/07_olap_queries.sql; dashboard/food_safety_dashboard.html"),
+                          ("G, H, I", "Regression, rules, tree", "notebooks 07, 08 and 09 (JupyterLab)"), ("J", "Architecture evaluation", "docs/architecture_comparison.md")],
+                         columns=["Part", "Topic", "Where it is shown"])
+    table(where, [0.7, 1.8, 4.3], "Where each part of the project is shown", 9, ["l", "l", "l"])
 
 
 def chapter6():
@@ -665,13 +745,14 @@ def chapter6():
              "**Areas** are quadrants of the street grid, not official community areas.",
              "**Synthetic scale-up.** Row counts above 61,737 in the Citus experiment are resampled facts used only to time queries."])
     h2("6.6 Architecture comparison and recommendation")
-    P("The three architectures were measured on the same data and the same four-core machine. The table summarises the comparison; `docs/architecture_comparison.md` has the full version with the evidence.", keep=True)
-    arch = pd.DataFrame([("Data arrival", "periodic loads; one month in about 0.5 s", "bulk load through a coordinator", "continuous events (a replay here)"),
+    P("The three architectures were measured on the same data and the same machine. The table summarises the comparison; `docs/architecture_comparison.md` has the full version with the evidence.", keep=True)
+    one_month = lt[lt["step"].str.startswith("[incremental]")]["seconds"].sum()
+    arch = pd.DataFrame([("Data arrival", f"periodic loads; one month in about {one_month:.1f} s", "bulk load through a coordinator", "continuous events (a replay here)"),
                          ("Processing", "SQL procedure in one process", "32 shard tasks merged by the coordinator", "Spark micro-batches every 2 seconds"),
-                         ("Historical analytics", "all queries 10 to 74 ms; 2,000,000 rows 174 to 269 ms", "same results; not faster on one machine", "operational window only"),
-                         ("Live monitoring", "none until the next load", "none", f"{LAT / 1000:.1f} s delay; queries 6 to 7 ms"),
+                         ("Historical analytics", f"all queries {qt['median_ms'].min():.0f} to {qt['median_ms'].max():.0f} ms", "same results; faster only on heavy queries", "operational window only"),
+                         ("Live monitoring", "none until the next load", "none", f"{LAT / 1000:.1f} s delay; queries {CHQ.min():.0f} to {CHQ.max():.0f} ms"),
                          ("Complexity", "one database", "coordinator, workers, distribution keys", "four services, about 2.5 GB"),
-                         ("Fault handling", "tested: a failed load changes nothing", "design analysis only", "Kafka keeps events; delivery at least once")],
+                         ("If something fails", "a load runs in one transaction: all or nothing", "a lost worker makes its shards unavailable", "Kafka keeps the events, so the job can resume")],
                         columns=["Parameter", "Batch (PostgreSQL)", "Distributed (Citus)", "Real-time"])
     table(arch, [1.4, 2.2, 1.8, 1.8], "Comparison of the three architectures", 8.5, ["l", "l", "l", "l"])
     callout("Recommendation.", "Use a batch warehouse as the system of record. Chicago adds about 16,000 inspections a year; one node answers every analytical question in milliseconds. "
@@ -684,17 +765,16 @@ def chapter7():
     P("This chapter lists the parts of the project brief, what was delivered for each and where the evidence is. Where a part differs from what the brief names, it says so.")
     rows = pd.DataFrame([("A. Dataset and curation", "Official data, documented source, profiling, logged cleaning decisions, derived attributes, exploratory analysis", "Done", "data_quality_report.md"),
                          ("B. Dimensional modelling", "Star, snowflake and fact constellation built and measured; constellation selected", "Done", "model_comparison.csv"),
-                         ("C. Batch warehouse", "Staging, ETL, initial and incremental load, idempotency, 16 checks, failed-load test, indexing, query timing", "Done", "load_audit.csv, validation_results.csv"),
+                         ("C. Batch warehouse", "Staging, ETL, initial and incremental load, surrogate keys, five integrity checks, indexing, query timing", "Done", "load_audit.csv, validation_results.csv"),
                          ("D. Distributed warehouse", "Citus cluster, distribution-key analysis, 25 timed comparisons", "Done; not faster on one machine", "distributed_scaling.csv"),
                          ("E. Real-time warehouse", "Kafka, Spark, ClickHouse, Grafana, validation and dead-letter handling", "Done; replay simulation", "streaming_metrics.csv"),
-                         ("F. OLAP and dashboard", "Roll-up, drill-down, slice, dice, pivot, CUBE, GROUPING SETS; ten findings; dashboard", "Done; HTML dashboard, no Power BI file; DAX not executed", "olap_operations.md"),
+                         ("F. OLAP and dashboard", "Roll-up, drill-down, slice, dice, pivot, CUBE, GROUPING SETS; ten findings; dashboard", "Done; HTML dashboard instead of Power BI", "olap_operations.md"),
                          ("G. Regression", "Simple and multiple regression with diagnostics", "Done", "regression_metrics.csv"),
                          ("H. Association rules", "Apriori and FP-Growth, rule selection, interpretation", "Done", "association_rules_selected.csv"),
                          ("I. Decision tree", "CART, tuning on a validation year, cut-off, paths, importance", "Done", "decision_tree_metrics.csv"),
                          ("J. Architecture evaluation", "Three architectures compared with measured values and a recommendation", "Done", "architecture_comparison.md")], columns=["Part", "What was delivered", "Status", "Evidence"])
     table(rows, [1.4, 2.9, 1.6, 1.5], "Requirement achievement matrix", 8.5, ["l", "l", "l", "l"])
-    P("Three properties of the batch warehouse were tested rather than assumed: the incremental load leaves earlier rows unchanged (checksum), loading a month twice adds nothing, and a failed load leaves no partial data. "
-      "The three mining parts use one analytical mart generated from the warehouse, not from the raw file, and one time-based split. The conclusion that failures are only weakly predictable is a finding, not an omission.")
+    P("The three mining parts use one analytical mart generated from the warehouse, not from the raw file, and one time-based split. The conclusion that failures are only weakly predictable is a finding, not an omission.")
 
 
 def chapter8():
@@ -702,7 +782,7 @@ def chapter8():
     h1("8 Code Appendix")
     P("The files below are reproduced verbatim from the repository. The curation rules (`etl/curation.py`), the remaining SQL files, the notebooks (curation, EDA, regression, association rules, decision tree) and the Citus and streaming set-up scripts are in the repository and are listed in the README.")
     for rel, lang in [("run_all.py", "Python"), ("etl/config.py", "Python"), ("etl/run_etl.py", "Python"), ("sql/01_schema.sql", "SQL (PostgreSQL)"), ("sql/02_load_batch.sql", "SQL (PL/pgSQL)"), ("sql/04_validation.sql", "SQL (PostgreSQL)"),
-                      ("sql/08_analytics_mart.sql", "SQL (PostgreSQL)"), ("etl/fault_test.py", "Python"), ("etl/model_comparison.py", "Python"), ("etl/distributed_citus.py", "Python"), ("streaming/producer.py", "Python"),
+                      ("sql/08_analytics_mart.sql", "SQL (PostgreSQL)"), ("etl/model_comparison.py", "Python"), ("etl/distributed_citus.py", "Python"), ("streaming/producer.py", "Python"),
                       ("streaming/spark_stream.py", "Python (PySpark)"), ("dashboard/build_dashboard.py", "Python (Plotly)")]:
         code_file(rel, lang)
 
@@ -711,14 +791,17 @@ def chapter9():
     state["chap"] = 9
     h1("9 Presentation Slides")
     pngs = sorted(SLIDES_DIR.glob("slide-*.png"))
-    P(f"The {len(pngs) if pngs else 14}-slide deck is `docs/Presentation.pptx` (speaker notes included). It follows the narrative of the report: the data, the method, the warehouse, the findings, the models, the architectures and the conclusion.")
+    P(f"The {len(pngs) if pngs else 10}-slide deck is `docs/Presentation.pptx`, designed in Gamma. It follows the narrative of the report: the problem, the pipeline, the warehouse, the findings, the three models, the other two warehouses and the conclusion.")
     if not pngs:
         P("(Slide images are created by this script when LibreOffice is installed; they were not available for this build.)", italic=True); return
     from pptx import Presentation
     prs = Presentation(str(ROOT / "docs" / "Presentation.pptx")); titles = []
     for sl in prs.slides:
         texts = [sh.text_frame.text for sh in sl.shapes if sh.has_text_frame and sh.text_frame.text.strip()]
-        titles.append(texts[1] if len(texts) > 1 and len(texts[0]) < 40 else texts[0])
+        heads = [t for t in texts if t.strip() and not t.strip().isupper()]          # skip small all-caps labels above the title
+        ttl = sl.shapes.title.text if sl.shapes.title is not None and sl.shapes.title.text.strip() else (heads[0] if heads else "")
+        ttl = ttl.splitlines()[0] if ttl else ""
+        titles.append(ttl)
     for i, png in enumerate(pngs):
         p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.keep_with_next = True; p.paragraph_format.space_after = Pt(2)
         p.add_run().add_picture(str(png), width=Inches(5.9))
@@ -731,15 +814,15 @@ def chapter10():
     h1("10 Limitations, Conclusion and Future Work")
     h2("10.1 Limitations")
     bullets(["The data are historical records. The real-time layer replays them; it was not exercised on a live feed, and its throughput was tested only at 80 events per second.",
-             "All timings come from one four-core machine and compare designs under equal conditions; they are not production capacity. The Citus nodes shared that machine.",
+             "All timings come from one laptop and compare designs under equal conditions; they are not production capacity. The Citus nodes shared that machine.",
              "Row counts above 61,737 in the scale test are a synthetic resampling of real facts, used only for timing.",
              "The record has no cause of failure other than the violations themselves, so prediction rests on history and circumstances; the models are weak.",
              "Facility attributes are the latest values (Type 1). Areas are quadrants of the street grid. There is no time of day.",
-             "Power BI Desktop is Windows-only, so no Power BI file was produced; the dashboard is an HTML page and the DAX measures in `docs/olap_operations.md` were written but not executed."])
+             "The brief recommends Power BI; the dashboard was built as an HTML page with Plotly instead, which shows the same sections and opens on any computer."])
     h2("10.2 Conclusion")
     P(f"The project built a reproducible pipeline from a public file to a dimensional warehouse, an OLAP layer, three kinds of mining models and a dashboard, and compared three warehouse architectures by measurement. "
-      f"The batch warehouse holds {N_FACT:,} completed inspections in a fact constellation; it loads, validates and repeats a load without changing earlier rows, and every business question runs in milliseconds. "
-      "The whole batch part runs with one command (`python run_all.py`) in about five minutes.")
+      f"The batch warehouse holds {N_FACT:,} completed inspections in a fact constellation; it is loaded in an initial and an incremental batch, checked after each load, and every business question runs in milliseconds. "
+      "The whole batch part runs with one command (`python run_all.py`) in about nine minutes, and `scripts/run_everything_wsl.sh full` rebuilds all three warehouses in about twenty.")
     P(f"The substantive findings are modest and clear. Failures became less frequent ({f22:.1f}% to {f25:.1f}%). The type of inspection and the history of the establishment matter more than the risk category. A failed inspection is usually followed by a clean one. "
       f"What is known before a visit predicts the outcome only weakly (R squared {multi['R2']:.2f}; AUC {tree5['ROC-AUC']:.2f}), so the models are useful for ordering inspections and not for deciding their results.")
     h2("10.3 Future work")
@@ -747,7 +830,7 @@ def chapter10():
              "Store one row per violation so that rule-level analysis (which rules cluster together) becomes an OLAP question.",
              "Add the time of day and staff or equipment information if the department can supply them; these are the most likely missing causes.",
              "Repeat the Citus experiment on separate machines and the streaming experiment on a live feed.",
-             "Rebuild the dashboard in Power BI on a Windows machine from the exported dimension and fact tables."])
+             "Rebuild the dashboard in Power BI directly on the star schema."])
 
 
 def references():
@@ -765,7 +848,8 @@ def references():
                 "Seabold, S. and Perktold, J. (2010). Statsmodels: econometric and statistical modeling with Python. *Proceedings of the 9th Python in Science Conference*.",
                 "Raschka, S. (2018). MLxtend: providing machine learning and data science utilities and extensions to Python's scientific computing stack. *Journal of Open Source Software*, 3(24), 638.",
                 "McKinney, W. (2010). Data structures for statistical computing in Python. *Proceedings of the 9th Python in Science Conference*.",
-                "PostgreSQL Global Development Group. *PostgreSQL 16 Documentation*. https://www.postgresql.org/docs/16/",
+                "PostgreSQL Global Development Group. *PostgreSQL 18 Documentation*. https://www.postgresql.org/docs/18/",
+                "Grafana Labs. *Grafana documentation*. https://grafana.com/docs/grafana/latest/",
                 "Citus Data. *Citus documentation*. https://docs.citusdata.com",
                 "Apache Software Foundation. *Apache Kafka* and *Apache Spark Structured Streaming* documentation. https://kafka.apache.org, https://spark.apache.org",
                 "ClickHouse, Inc. *ClickHouse documentation*. https://clickhouse.com/docs"]:
@@ -800,10 +884,14 @@ def render_slides():
         return
     SLIDES_DIR.mkdir(parents=True, exist_ok=True)
     tmp = SLIDES_DIR / "_tmp"; tmp.mkdir(exist_ok=True)
-    subprocess.run([soffice, "--headless", "--convert-to", "pdf", "--outdir", str(tmp), str(pptx)], check=True, capture_output=True)
+    ready = ROOT / "docs" / "Presentation.pdf"          # PDF exported with the deck: exact fonts and images
+    if ready.exists():
+        shutil.copy(ready, tmp / "Presentation.pdf")
+    else:
+        subprocess.run([soffice, "--headless", "--convert-to", "pdf", "--outdir", str(tmp), str(pptx)], check=True, capture_output=True)
     for old in SLIDES_DIR.glob("slide-*.png"):
         old.unlink()
-    subprocess.run([pdftoppm, "-r", "90", "-png", str(tmp / "Presentation.pdf"), str(SLIDES_DIR / "slide")], check=True)
+    subprocess.run([pdftoppm, "-r", "110", "-png", str(tmp / "Presentation.pdf"), str(SLIDES_DIR / "slide")], check=True)
     for f in tmp.iterdir():
         f.unlink()
     tmp.rmdir()

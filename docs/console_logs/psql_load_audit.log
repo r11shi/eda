@@ -1,0 +1,8 @@
+$ psql -d foodsafety
+SELECT batch_id, batch_label, rows_staged, rows_not_completed, rows_loaded_fact, new_facilities, status FROM staging.load_audit ORDER BY batch_id;
+ batch_id |           batch_label            | rows_staged | rows_not_completed | rows_loaded_fact | new_facilities | status 
+----------+----------------------------------+-------------+--------------------+------------------+----------------+--------
+        1 | initial load Jan 2022 - Nov 2025 |       72130 |              11522 |            60608 |          16901 | loaded
+        2 | incremental load Dec 2025        |        1471 |                342 |             1129 |            182 | loaded
+(2 rows)
+

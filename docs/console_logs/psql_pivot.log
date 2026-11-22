@@ -1,0 +1,15 @@
+$ psql -d foodsafety
+SELECT d.year,
+       count(*) FILTER (WHERE r.result_group = 'Pass') AS pass,
+       count(*) FILTER (WHERE r.result_group = 'Conditional Pass') AS conditional,
+       count(*) FILTER (WHERE r.result_group = 'Fail') AS fail
+FROM dw.fact_inspection f JOIN dw.dim_date d USING (date_key) JOIN dw.dim_result r USING (result_key)
+GROUP BY d.year ORDER BY d.year;
+ year | pass  | conditional | fail 
+------+-------+-------------+------
+ 2022 |  8225 |        2503 | 3553
+ 2023 |  9223 |        2354 | 3835
+ 2024 |  9906 |        2605 | 3481
+ 2025 | 10380 |        2281 | 3391
+(4 rows)
+

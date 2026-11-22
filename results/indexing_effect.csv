@@ -1,7 +1,7 @@
 query,stage,median_ms,plan_top
-history of one facility (WHERE facility_key = x),without index,3.17,Aggregate  (cost=1473.79..1473.80 rows=1 width=16)
-history of one facility (WHERE facility_key = x),with index,0.24,Aggregate  (cost=109.53..109.54 rows=1 width=16)
-one month of inspections (date_key range),without index,5.35,Aggregate  (cost=1631.75..1631.76 rows=1 width=16)
-one month of inspections (date_key range),with index,0.34,Aggregate  (cost=33.00..33.01 rows=1 width=16)
-one batch (WHERE batch_id = 2),without index,4.45,Aggregate  (cost=1476.63..1476.64 rows=1 width=8)
-one batch (WHERE batch_id = 2),with index,0.18,Aggregate  (cost=27.09..27.10 rows=1 width=8)
+history of one facility (WHERE facility_key = x),without index,6.5,Aggregate  (cost=1473.82..1473.83 rows=1 width=16)
+history of one facility (WHERE facility_key = x),with index,0.53,Aggregate  (cost=77.92..77.93 rows=1 width=16)
+one month of inspections (date_key range),without index,6.69,Aggregate  (cost=1631.95..1631.96 rows=1 width=16)
+one month of inspections (date_key range),with index,0.9,Aggregate  (cost=40.40..40.41 rows=1 width=16)
+one batch (WHERE batch_id = 2),without index,9.48,Aggregate  (cost=1476.47..1476.48 rows=1 width=8)
+one batch (WHERE batch_id = 2),with index,0.63,Aggregate  (cost=42.73..42.74 rows=1 width=8)

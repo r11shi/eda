@@ -12,11 +12,11 @@ HashAggregate
                           Hash Cond: (f.result_key = r.result_key)
                           ->  Hash Join
                                 Hash Cond: (f.facility_key = fa.facility_key)
-                                ->  Seq Scan on fact_1000000_facility_key_102108 f
+                                ->  Seq Scan on fact_1000000_facility_key_102336 f
                                 ->  Hash
-                                      ->  Seq Scan on dim_facility_102009 fa
+                                      ->  Seq Scan on dim_facility_102237 fa
                           ->  Hash
-                                ->  Seq Scan on dim_result_102010 r
+                                ->  Seq Scan on dim_result_102238 r
 
 --- Q5 facility x year aggregation (distributed by facility_key, 1,000,000 rows)
 Custom Scan (Citus Adaptive)
@@ -28,7 +28,7 @@ Custom Scan (Citus Adaptive)
               Group Key: f.facility_key, d.year
               ->  Hash Join
                     Hash Cond: (f.date_key = d.date_key)
-                    ->  Seq Scan on fact_1000000_facility_key_102108 f
+                    ->  Seq Scan on fact_1000000_facility_key_102336 f
                     ->  Hash
-                          ->  Seq Scan on dim_date_102008 d
+                          ->  Seq Scan on dim_date_102236 d
 

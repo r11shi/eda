@@ -1,33 +1,11 @@
 stage,check_name,value
-after initial load,annual fact violations - fact violations,0
-after initial load,annual fact inspections - fact rows,0
-after initial load,fail_count difference staging vs fact,0
-after initial load,violation_count difference staging vs fact,0
-after initial load,batches where staged <> loaded + not_completed + rejected,0
-after initial load,facts mapped to Unknown facility (key 0),0
-after initial load,facts mapped to Unknown location (key 0),0
-after initial load,orphan result_key,0
-after initial load,orphan inspection_type_key,0
-after initial load,orphan location_key,0
-after initial load,orphan date_key,0
-after initial load,orphan annual facility_key,0
-after initial load,orphan facility_key,0
-after initial load,staging completed rows not in fact,0
-after initial load,fact rows not in staging,0
-after initial load,duplicate inspection_id in fact,0
-after incremental load,annual fact violations - fact violations,0
-after incremental load,annual fact inspections - fact rows,0
-after incremental load,fail_count difference staging vs fact,0
-after incremental load,violation_count difference staging vs fact,0
-after incremental load,batches where staged <> loaded + not_completed + rejected,0
-after incremental load,facts mapped to Unknown facility (key 0),0
-after incremental load,facts mapped to Unknown location (key 0),0
-after incremental load,orphan result_key,0
-after incremental load,orphan inspection_type_key,0
-after incremental load,orphan location_key,0
-after incremental load,orphan date_key,0
-after incremental load,orphan annual facility_key,0
-after incremental load,orphan facility_key,0
-after incremental load,fact rows not in staging,0
-after incremental load,duplicate inspection_id in fact,0
-after incremental load,staging completed rows not in fact,0
+after initial load,fact rows whose date/facility/type/result/location key is missing in its dimension,0
+after initial load,duplicate inspection ids in the fact table,0
+after initial load,cleaned completed rows in staging that did not reach the fact table,0
+after initial load,total violations: staging minus fact,0
+after initial load,inspections: yearly summary fact minus detail fact,0
+after incremental load,fact rows whose date/facility/type/result/location key is missing in its dimension,0
+after incremental load,duplicate inspection ids in the fact table,0
+after incremental load,cleaned completed rows in staging that did not reach the fact table,0
+after incremental load,total violations: staging minus fact,0
+after incremental load,inspections: yearly summary fact minus detail fact,0

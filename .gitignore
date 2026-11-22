@@ -6,3 +6,6 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 dashboard/powerbi/data/
+
+# source-code zips are copies of this repository; build them locally for Moodle
+deliverables/*.zip

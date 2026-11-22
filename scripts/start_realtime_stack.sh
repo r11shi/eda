@@ -26,7 +26,7 @@ if ! "$K/bin/kafka-topics.sh" --bootstrap-server localhost:9092 --list >/dev/nul
   ( export KAFKA_HEAP_OPTS="-Xmx768m -Xms256m"; exec nohup "$K/bin/kafka-server-start.sh" "$CFG" ) > "$L/kafka.stdout" 2>&1 &
   until "$K/bin/kafka-topics.sh" --bootstrap-server localhost:9092 --list >/dev/null 2>&1; do sleep 2; done
 fi
-"$K/bin/kafka-topics.sh" --bootstrap-server localhost:9092 --create --if-not-exists --topic food_inspections --partitions 3 --replication-factor 1 2>&1 | grep -v -E "Picked up|WARNING"
+"$K/bin/kafka-topics.sh" --bootstrap-server localhost:9092 --create --if-not-exists --topic food_inspections --partitions 3 --replication-factor 1 2>&1 | { grep -v -E "Picked up|WARNING" || true; }
 
 # 3. Spark Structured Streaming (reads only NEW events: startingOffsets=latest)
 ( cd "$ROOT"; exec nohup "$ROOT/runtime/venv-spark/bin/python" streaming/spark_stream.py --fresh --starting-offsets latest ) > "$L/spark.log" 2>&1 &

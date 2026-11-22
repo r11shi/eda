@@ -1,5 +1,5 @@
 cluster,resident_memory_MB
-main,124
-coord,277
-worker1,907
-worker2,922
+main,33
+coord,71
+worker1,70
+worker2,71

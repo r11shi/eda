@@ -1,0 +1,103 @@
+Database OK: foodsafety@localhost:5432/foodsafety
+
+[1/12] Get the data
+  unpacking the bundled data file (data/raw/*.csv.gz)
+  done in 0.5 s
+
+[2/12] Part A: profile and clean the data (notebook 01)
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+  done in 16.0 s
+
+[3/12] Part A: exploratory analysis (notebook 02)
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+  done in 13.9 s
+
+[4/12] Parts B, C: create the warehouse, initial load, incremental load, checks
+Creating schemas, dimensions and fact tables
+INITIAL LOAD: 72,130 curated rows (2022-01-03 .. 2025-11-28)
+  [initial] create audit record                              0.007 s
+  [initial] stage 72,130 rows (COPY)                         3.428 s
+  [initial] DQ rules + dimensions + facts (CALL dw.load_batch)   21.782 s
+  [initial] create indexes + ANALYZE                         5.061 s
+  validation [after initial load]: 5 checks, failures = 0
+  warehouse after initial load: {'fact_inspection': 60608, 'dim_facility': 16902, 'dim_location': 252, 'dim_inspection_type': 15, 'dim_result': 4, 'fact_facility_annual': 41546}
+INCREMENTAL LOAD: 1,471 curated rows (2025-12-01 .. 2025-12-31)
+  [incremental] create audit record                          0.046 s
+  [incremental] stage 1,471 rows (COPY)                      0.058 s
+  [incremental] DQ rules + dimensions + facts (CALL dw.load_batch)    1.174 s
+  validation [after incremental load]: 5 checks, failures = 0
+  warehouse after incremental load: {'fact_inspection': 61737, 'dim_facility': 17084, 'dim_location': 252, 'dim_inspection_type': 15, 'dim_result': 4, 'fact_facility_annual': 42154}
+  done in 36.7 s
+
+[5/12] Part B: compare star, snowflake and fact constellation
+                                          criterion  star  snowflake  fact_constellation
+                                   Number of tables   6.0       16.0                 7.0
+Joins for QA (year/quarter x facility group x area)   3.0        9.0                 3.0
+                                QA median time (ms)  83.2      161.5                83.2
+                                QB median time (ms)  60.7       97.2                60.7
+         Facility x year question: median time (ms)  29.5       29.5                 4.3
+                                                        query  star_joins  snowflake_joins  star_ms  snowflake_ms
+QA: fail rate by year, quarter, facility group and area group           3                9     83.2         161.5
+QB: inspections by facility type, risk group and result group           2                5     60.7          97.2
+star+constellation schema (dw): 7 tables, 22 MB | snowflake (snow): 16 tables, 13 MB
+dimension bytes: dw 4251648  snow 3366912
+rows: fact 61737 annual fact 42154 dim_facility 17084
+[('dw.dim_facility', 17084), ('snow.dim_facility', 17084), ('snow.dim_facility_type', 161), ('snow.dim_facility_group', 7), ('dw.dim_date', 1826), ('snow.dim_date', 1826), ('snow.dim_month', 60), ('dw.dim_location', 252), ('snow.dim_location', 252), ('snow.dim_zip', 100)]
+  done in 13.3 s
+
+[6/12] Part C: time the analytical queries and the indexes
+Q1a       4 rows      25.2 ms  Q1a Annual inspection volume
+Q1b      48 rows      32.6 ms  Q1b Monthly inspection volume
+Q2       15 rows      51.4 ms  Q2 Facility types receiving the most inspections
+Q3        4 rows      35.0 ms  Q3 Pass, conditional-pass and fail rates by year
+Q4        4 rows      52.7 ms  Q4 Results across risk categories
+Q5        8 rows      31.1 ms  Q5 Inspection types associated with higher failure rates
+Q6a       3 rows      51.4 ms  Q6a Violation counts by result group
+Q6b      15 rows     122.1 ms  Q6b Most common violation rule numbers (rule-level detail is kept in staging, not in the star schema)
+Q7a       5 rows      31.6 ms  Q7a Geographic area groups: failures and failure rate
+Q7b      10 rows      33.2 ms  Q7b ZIP codes with the highest failure rate (at least 200 inspections)
+Q7c      10 rows      30.9 ms  Q7c ZIP codes with the most failures (counts, not rates)
+Q8a       4 rows     111.5 ms  Q8a Repeat inspections: fail rate by the position of the inspection in the facility's history (licensed facilities only)
+Q8b       1 rows     139.5 ms  Q8b Repeat inspections: what happens at the next inspection after a failed one
+Q8c      10 rows      60.4 ms  Q8c Facilities with the most inspections in the period
+                                           query         stage  median_ms                                           plan_top
+history of one facility (WHERE facility_key = x) without index       6.50 Aggregate  (cost=1473.82..1473.83 rows=1 width=16)
+history of one facility (WHERE facility_key = x)    with index       0.53     Aggregate  (cost=77.92..77.93 rows=1 width=16)
+       one month of inspections (date_key range) without index       6.69 Aggregate  (cost=1631.95..1631.96 rows=1 width=16)
+       one month of inspections (date_key range)    with index       0.90     Aggregate  (cost=40.40..40.41 rows=1 width=16)
+                  one batch (WHERE batch_id = 2) without index       9.48  Aggregate  (cost=1476.47..1476.48 rows=1 width=8)
+                  one batch (WHERE batch_id = 2)    with index       0.63      Aggregate  (cost=42.73..42.74 rows=1 width=8)
+  done in 8.1 s
+
+[7/12] Part F: OLAP operations
+written docs/olap_operations.md with 9 operations
+  done in 1.4 s
+
+[8/12] Analytical mart (input of the models)
+  mart rows: 61,737
+  done in 1.7 s
+
+[9/12] Part F: HTML dashboard
+written /root/eda/dashboard/food_safety_dashboard.html 5.0 MB
+  done in 3.3 s
+
+[10/12] Part G: regression (notebook 07)
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+  done in 375.3 s
+
+[11/12] Part H: association rules (notebook 08)
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+  done in 14.1 s
+
+[12/12] Part I: decision tree (notebook 09)
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+  done in 131.2 s
+
+All 12 steps finished in 10.3 minutes.
+
+Results (files in results/):
+  warehouse checks: 5 checks, 0 problems
+  fact rows loaded per batch (initial, incremental): 60608, 1129
+  regression: MAE 2.45, R2 0.12
+  decision tree AUC: 0.635
+  dashboard: dashboard/food_safety_dashboard.html (open it in a browser)

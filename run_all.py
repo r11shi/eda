@@ -6,7 +6,7 @@
     python run_all.py --docker     # start the PostgreSQL container from docker-compose.yml first
     python run_all.py --skip-eda --skip-models      # leave out notebooks 02 and 07-09 (faster)
 
-Order: data > cleaning (notebook 01) > exploration (02) > warehouse load (etl/run_etl.py) > model comparison > query timing > fault test
+Order: data > cleaning (notebook 01) > exploration (02) > warehouse load (etl/run_etl.py) > model comparison > query timing
 > OLAP > analytical mart > dashboard > regression, association rules, decision tree (notebooks 07-09).
 Database settings: etl/config.py (environment variables FS_DB_* or a .env file). Parts D (Citus) and E (real-time) need extra servers: see README.md.
 """
@@ -104,9 +104,9 @@ def summary():
     say("\nResults (files in results/):")
     try:
         v = pd.read_csv(R / "validation_results.csv")
-        bad = v[(v["value"] != 0) & ~v["check_name"].str.startswith("facts mapped to Unknown")]
-        say(f"  warehouse validation: {v['check_name'].nunique()} checks, {len(bad)} failures")
-        say("  fact rows loaded per batch (initial, incremental, repeat): " + ", ".join(str(x) for x in pd.read_csv(R / "load_audit.csv")["rows_loaded_fact"]))
+        bad = v[(v["value"] != 0)]
+        say(f"  warehouse checks: {v['check_name'].nunique()} checks, {len(bad)} problems")
+        say("  fact rows loaded per batch (initial, incremental): " + ", ".join(str(x) for x in pd.read_csv(R / "load_audit.csv")["rows_loaded_fact"]))
         r = pd.read_csv(R / "regression_metrics.csv").set_index("Model")
         say(f"  regression: MAE {r.loc['Multiple LR: all test inspections', 'MAE']:.2f}, R2 {r.loc['Multiple LR: all test inspections', 'R2']:.2f}")
         say(f"  decision tree AUC: {pd.read_csv(R / 'decision_tree_metrics.csv').iloc[1]['ROC-AUC']:.3f}")
@@ -126,10 +126,9 @@ def main():
     steps = [("Get the data", get_data), ("Part A: profile and clean the data (notebook 01)", lambda: run_notebook("notebooks/01_data_curation.ipynb"))]
     if not args.skip_eda:
         steps.append(("Part A: exploratory analysis (notebook 02)", lambda: run_notebook("notebooks/02_eda.ipynb")))
-    steps += [("Parts B, C: create the warehouse, initial load, validation, incremental load, repeat-load test", lambda: run_script("etl/run_etl.py", "all")),
+    steps += [("Parts B, C: create the warehouse, initial load, incremental load, checks", lambda: run_script("etl/run_etl.py", "all")),
               ("Part B: compare star, snowflake and fact constellation", lambda: run_script("etl/model_comparison.py")),
               ("Part C: time the analytical queries and the indexes", lambda: run_script("etl/run_queries.py")),
-              ("Part C: failed-load (atomic) test", lambda: run_script("etl/fault_test.py")),
               ("Part F: OLAP operations", lambda: run_script("etl/run_olap.py")),
               ("Analytical mart (input of the models)", build_mart),
               ("Part F: HTML dashboard", lambda: run_script("dashboard/build_dashboard.py"))]

@@ -1,26 +1,26 @@
 query,rows,centralized_ms,distributed_ms,distributed_over_centralized,results_identical
-Q1 results by facility type,61737,26.4,66.6,2.52,True
-Q2 failure rate by area,61737,26.2,18.0,0.69,True
-Q3 monthly inspections,61737,20.0,41.0,2.05,True
-Q4 violations by risk,61737,32.9,65.4,1.99,True
-Q5 facility x year aggregation,61737,56.5,130.2,2.3,True
-Q1 results by facility type,100000,38.9,73.4,1.89,True
-Q2 failure rate by area,100000,43.3,32.0,0.74,True
-Q3 monthly inspections,100000,34.7,43.8,1.26,True
-Q4 violations by risk,100000,49.8,53.5,1.07,True
-Q5 facility x year aggregation,100000,59.5,121.2,2.04,True
-Q1 results by facility type,500000,78.3,176.2,2.25,True
-Q2 failure rate by area,500000,60.2,91.8,1.52,True
-Q3 monthly inspections,500000,58.7,83.1,1.42,True
-Q4 violations by risk,500000,56.0,135.5,2.42,True
-Q5 facility x year aggregation,500000,257.3,158.3,0.62,True
-Q1 results by facility type,1000000,178.3,223.2,1.25,True
-Q2 failure rate by area,1000000,113.2,120.3,1.06,True
-Q3 monthly inspections,1000000,91.0,130.9,1.44,True
-Q4 violations by risk,1000000,88.8,173.1,1.95,True
-Q5 facility x year aggregation,1000000,307.0,192.5,0.63,True
-Q1 results by facility type,2000000,269.3,398.2,1.48,True
-Q2 failure rate by area,2000000,232.0,251.0,1.08,True
-Q3 monthly inspections,2000000,174.5,196.3,1.12,True
-Q4 violations by risk,2000000,186.2,234.6,1.26,True
-Q5 facility x year aggregation,2000000,255.1,291.3,1.14,True
+Q1 results by facility type,61737,45.9,74.9,1.63,True
+Q2 failure rate by area,61737,25.2,38.8,1.54,True
+Q3 monthly inspections,61737,23.0,47.4,2.06,True
+Q4 violations by risk,61737,32.4,60.4,1.86,True
+Q5 facility x year aggregation,61737,102.3,160.8,1.57,True
+Q1 results by facility type,100000,64.3,85.2,1.33,True
+Q2 failure rate by area,100000,41.1,47.9,1.17,True
+Q3 monthly inspections,100000,39.0,52.4,1.34,True
+Q4 violations by risk,100000,45.6,62.3,1.37,True
+Q5 facility x year aggregation,100000,89.7,123.9,1.38,True
+Q1 results by facility type,500000,174.3,189.8,1.09,True
+Q2 failure rate by area,500000,87.7,138.4,1.58,True
+Q3 monthly inspections,500000,107.0,141.5,1.32,True
+Q4 violations by risk,500000,96.9,188.9,1.95,True
+Q5 facility x year aggregation,500000,278.4,166.0,0.6,True
+Q1 results by facility type,1000000,261.4,284.8,1.09,True
+Q2 failure rate by area,1000000,216.5,263.3,1.22,True
+Q3 monthly inspections,1000000,175.0,164.3,0.94,True
+Q4 violations by risk,1000000,168.3,211.9,1.26,True
+Q5 facility x year aggregation,1000000,471.0,200.8,0.43,True
+Q1 results by facility type,2000000,1169.1,612.3,0.52,True
+Q2 failure rate by area,2000000,391.0,340.8,0.87,True
+Q3 monthly inspections,2000000,318.9,260.4,0.82,True
+Q4 violations by risk,2000000,362.3,429.6,1.19,True
+Q5 facility x year aggregation,2000000,423.6,335.8,0.79,True

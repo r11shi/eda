@@ -52,8 +52,9 @@ panels = [
                         "UNION ALL SELECT 'avg latency emit -> ClickHouse (ms)', toString(round(avg(dateDiff('millisecond', emitted_at, written_at)))) FROM food.inspection_events WHERE $__timeFilter(ingest_ts) "
                         "UNION ALL SELECT 'p95 latency (ms)', toString(round(quantile(0.95)(dateDiff('millisecond', emitted_at, written_at)))) FROM food.inspection_events WHERE $__timeFilter(ingest_ts)")]},
 ]
-dashboard = {"uid": "food-safety-rt", "title": "Food Safety: Real-Time Inspection Monitor (replay simulation)", "tags": ["food-safety", "replay-simulation"], "timezone": "utc",
-             "schemaVersion": 39, "version": 1, "refresh": "5s", "time": {"from": "now-15m", "to": "now"}, "panels": panels, "editable": True}
+dashboard = {"uid": "food-safety-rt", "title": "E · Real-time warehouse: inspection monitor (replay simulation)", "tags": ["food-safety", "replay-simulation"], "timezone": "utc",
+             "schemaVersion": 39, "version": 1, "refresh": "5s", "time": {"from": "now-6h", "to": "now"}, "panels": panels, "editable": True,
+             "links": []}
 out = Path(__file__).with_name("food_safety_realtime_dashboard.json")
 out.write_text(json.dumps(dashboard, indent=2))
 print("wrote", out.name, "with", len(panels), "panels")

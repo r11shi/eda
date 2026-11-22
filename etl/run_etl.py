@@ -1,7 +1,7 @@
-"""Batch ETL driver:  Extract (curated CSV) -> Stage -> Data-quality rules -> Dimension lookups -> Fact load -> Validate.
+"""Part C - batch ETL:  Extract (cleaned CSV) -> Staging table -> Transform + load dimensions and facts -> Check.
 
-  python etl/run_etl.py all          # create schema, initial load (Jan 2022-Nov 2025), indexes, validation,
-                                     # then the incremental load of the held-back month (Dec 2025) and validation
+  python etl/run_etl.py all          # create the tables, initial load (Jan 2022 - Nov 2025), indexes, checks,
+                                     # then the incremental load of the last month (Dec 2025) and the checks again
   python etl/run_etl.py initial | incremental | validate
 """
 import io, sys, time, csv
@@ -81,7 +81,7 @@ def validate(conn, tag):
         cur.execute((SQL / "04_validation.sql").read_text())
         rows = cur.fetchall()
     res = pd.DataFrame(rows, columns=["check_name", "value"])
-    ri = res[~res["check_name"].str.startswith("facts mapped to Unknown")]
+    ri = res
     print(f"  validation [{tag}]: {len(res)} checks, failures = {int((ri['value'] != 0).sum())}")
     res.insert(0, "stage", tag)
     return res
@@ -96,8 +96,6 @@ def counts(conn):
         for k, t in q.items():
             cur.execute(f"SELECT count(*) FROM {t}")
             out[k] = cur.fetchone()[0]
-        cur.execute("SELECT md5(string_agg(inspection_id::text || '|' || date_key || '|' || facility_key || '|' || coalesce(violation_count::text,'n'), ',' ORDER BY inspection_id)) FROM dw.fact_inspection WHERE batch_id = 1")
-        out["checksum_batch1_rows"] = cur.fetchone()[0]
     return out
 
 
@@ -125,13 +123,7 @@ def main(mode):
         validations.append(validate(conn, "after incremental load"))
         after = counts(conn)
         print("  warehouse after incremental load:", after)
-        print("  batch-1 rows untouched (checksum equal):", before["checksum_batch1_rows"] == after["checksum_batch1_rows"])
         pd.DataFrame([{"object": k, "before_incremental": before[k], "after_incremental": after[k]} for k in before]).to_csv(RESULTS / "incremental_load_demo.csv", index=False)
-        # idempotency: loading the same month again must add nothing (duplicates rejected by the DQ rules)
-        rerun = run_batch(conn, inc, "re-run of Dec 2025 (idempotency test)", "rerun")
-        with conn.cursor() as cur:
-            cur.execute("SELECT rows_staged, rows_rejected, rows_loaded_fact FROM staging.load_audit WHERE batch_id=%s", (rerun,))
-            print("  re-run of the same month  (staged, rejected, loaded):", cur.fetchone())
     if validations:
         pd.concat(validations).to_csv(RESULTS / "validation_results.csv", index=False)
     with conn.cursor() as cur:

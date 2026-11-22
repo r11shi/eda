@@ -1,0 +1,30 @@
+$ psql -d foodsafety
+SELECT coalesce(d.year::text, 'ALL') AS year, coalesce('Q' || d.quarter, 'ALL') AS quarter, count(*) AS inspections,
+       round(100.0 * sum(f.fail_count) / count(*), 1) AS fail_rate_pct
+FROM dw.fact_inspection f JOIN dw.dim_date d USING (date_key)
+GROUP BY ROLLUP (d.year, d.quarter) ORDER BY d.year, d.quarter;
+ year | quarter | inspections | fail_rate_pct 
+------+---------+-------------+---------------
+ 2022 | Q1      |        3091 |          24.1
+ 2022 | Q2      |        3760 |          24.9
+ 2022 | Q3      |        3807 |          25.7
+ 2022 | Q4      |        3623 |          24.6
+ 2022 | ALL     |       14281 |          24.9
+ 2023 | Q1      |        3708 |          24.7
+ 2023 | Q2      |        3906 |          25.0
+ 2023 | Q3      |        3818 |          26.7
+ 2023 | Q4      |        3980 |          23.1
+ 2023 | ALL     |       15412 |          24.9
+ 2024 | Q1      |        3715 |          25.1
+ 2024 | Q2      |        4187 |          21.7
+ 2024 | Q3      |        4054 |          21.3
+ 2024 | Q4      |        4036 |          19.3
+ 2024 | ALL     |       15992 |          21.8
+ 2025 | Q1      |        4269 |          21.4
+ 2025 | Q2      |        4246 |          20.5
+ 2025 | Q3      |        3890 |          22.2
+ 2025 | Q4      |        3647 |          20.4
+ 2025 | ALL     |       16052 |          21.1
+ ALL  | ALL     |       61737 |          23.1
+(21 rows)
+

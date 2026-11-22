@@ -1,0 +1,15 @@
+$ psql -d foodsafety
+SELECT fa.facility_group, count(*) AS inspections, round(100.0 * sum(f.fail_count) / count(*), 1) AS fail_rate_pct
+FROM dw.fact_inspection f JOIN dw.dim_facility fa USING (facility_key)
+GROUP BY fa.facility_group ORDER BY inspections DESC;
+        facility_group         | inspections | fail_rate_pct 
+-------------------------------+-------------+---------------
+ Restaurant & Food Service     |       43080 |          22.9
+ Schools & Childcare           |        8609 |          23.6
+ Retail Food & Grocery         |        7132 |          24.9
+ Mobile, Catering & Events     |        1510 |          16.5
+ Healthcare & Residential Care |        1303 |          22.9
+ Unknown                       |          87 |          25.3
+ Other                         |          16 |          31.3
+(7 rows)
+
