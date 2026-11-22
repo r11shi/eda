@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Food Safety Doubts and Answers</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
+/* Layout: one narrow reading column; figures may run a little wider. */
+:root{--bg:#fdfdfc;--ink:#21201c;--mute:#63635e;--line:#e9e8e4;--code:#f6f6f4;--card:#ffffff;
+ --d-ink:#21201c;--d-mute:#63635e;--d-box:#ffffff;--d-line:#c9c8c2;--d-acc:#2f5bd3;--d-acc2:#1f8a5b;--d-warm:#c2542d;--d-tint:#eaf0fd;--d-tint2:#e6f4ec;--d-tint3:#fbeae4;
+ --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111110;--ink:#eeeeec;--mute:#a1a09a;--line:#2a2a28;--code:#191918;--card:#191918;
+ --d-ink:#eeeeec;--d-mute:#a1a09a;--d-box:#1c1c1b;--d-line:#3a3a37;--d-acc:#7d9bf0;--d-acc2:#5cc28f;--d-warm:#ec8a63;--d-tint:#1c2540;--d-tint2:#16291f;--d-tint3:#33201a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111110;--ink:#eeeeec;--mute:#a1a09a;--line:#2a2a28;--code:#191918;--card:#191918;
+ --d-ink:#eeeeec;--d-mute:#a1a09a;--d-box:#1c1c1b;--d-line:#3a3a37;--d-acc:#7d9bf0;--d-acc2:#5cc28f;--d-warm:#ec8a63;--d-tint:#1c2540;--d-tint2:#16291f;--d-tint3:#33201a;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:720px;margin:0 auto;padding-block:64px 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main>*{min-width:0}
+h1,h2,h3{text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:22px;font-weight:600;margin:0 0 6px}h1+p{color:var(--mute);margin-top:4px}
+h2{font-size:17px;font-weight:600;margin:64px 0 12px;padding-top:20px;border-top:1px solid var(--line);scroll-margin-top:24px}
+h3{font-size:14.5px;font-weight:600;margin:28px 0 8px}
+p{margin:0 0 16px}strong{font-weight:600}
+a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}a:hover{text-decoration-color:var(--mute)}
+a:focus-visible{outline:2px solid var(--d-acc);outline-offset:2px;border-radius:3px}
+ul,ol{padding-left:20px;margin:0 0 16px}li{margin:4px 0}
+hr{border:0;margin:0}
+blockquote{margin:0 0 16px;padding-left:14px;border-left:2px solid var(--line);color:var(--mute)}
+code{font:13px/1.6 var(--mono);background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+.cw{overflow-x:auto;margin:0 0 20px;border:1px solid var(--line);border-radius:10px;background:var(--code)}
+pre{margin:0;padding:14px 16px}pre code{background:none;border:0;padding:0;font-size:12.5px;line-height:1.65;white-space:pre}
+.tw{overflow-x:auto;margin:0 0 20px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}th{font-weight:500;color:var(--mute);background:var(--code)}
+figure{margin:24px 0 28px}
+.fig{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:12px;overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;min-width:520px}
+.fig img{display:block;width:100%;height:auto;border-radius:6px;background:#fff}
+figcaption{font-size:13.5px;line-height:1.6;color:var(--mute);margin-top:10px}
+figcaption .ft{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
+figcaption p{margin:0 0 2px}figcaption strong{color:var(--ink);font-weight:600}
+.top{color:var(--mute);font-size:13px;margin-bottom:40px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style></head><body><main><div class="top">Doubts and answers · Data Analytics (MDM) · Department of Computer Engineering</div><h1 id="doubts--answers">Doubts &amp; Answers</h1>
+<p>Every question mam may ask, with a short answer. Owner in brackets: pass the question to that person.</p>
+<h2 id="the-project">The project</h2>
+<p><strong>What is the project?</strong> Chicago food inspections 2022-2025 (73,630 rows): we cleaned them, built a data warehouse, answered 10 business questions with SQL and OLAP, trained three models, and compared three kinds of warehouse.</p>
+<p><strong>Why this dataset?</strong> It is official open data, large enough for a warehouse, and has dates, places, categories and outcomes, which every part of the brief needs.</p>
+<p><strong>What tools?</strong> Python (pandas, scikit-learn, mlxtend) in Jupyter; PostgreSQL; Citus; Kafka, Spark, ClickHouse, Grafana; an HTML dashboard with Plotly. Everything runs in Ubuntu on Windows (WSL).</p>
+<p><strong>How do you run it?</strong> <code>Start_Project.cmd</code> starts the servers; <code>Project_Menu.cmd</code> runs one part; <code>python run_all.py</code> runs the batch part in 10 minutes.</p>
+<p><strong>What is the main finding?</strong> The fail rate is 23.1% and fell from 24.9% to 21.1%; complaint inspections fail most (37.6%); after a fail, 79% of next visits pass.</p>
+<h2 id="part-a-data-and-cleaning-omkar">Part A: data and cleaning (Omkar)</h2>
+<p><strong>What problems did the data have?</strong> Visits that never happened, an invalid risk code &quot;All&quot;, &quot;Chicago&quot; spelled several ways, 217 hand-typed facility types, violations as one long text, 29 duplicate reports.</p>
+<p><strong>Did you delete bad rows?</strong> Only the 29 duplicates. Invalid codes became Unknown; visits that never happened are kept but not counted.</p>
+<p><strong>How did you count violations?</strong> Split the text at &quot;|&quot; and count the rule numbers at the start of each piece.</p>
+<p><strong>Fail with no violation text?</strong> Count = unknown (552 rows), not 0, because a fail always has violations.</p>
+<p><strong>What is a derived attribute?</strong> A column we calculated, e.g. violation band, season, result group, area.</p>
+<p><strong>How is the area defined?</strong> The quadrant of Chicago's street grid around State &amp; Madison: NorthWest, NorthEast, SouthWest, SouthEast.</p>
+<p><strong>What did EDA show?</strong> Volume rose about 12% in four years; restaurants get 7 in 10 inspections; weekends are empty; most inspections have 0-5 violations; fails have more.</p>
+<h2 id="parts-b-c-f-warehouse-etl-olap-aryan">Parts B, C, F: warehouse, ETL, OLAP (Aryan)</h2>
+<p><strong>What is a data warehouse?</strong> A database designed for analysis: questions about many records at once.</p>
+<p><strong>What is the grain?</strong> One completed inspection of one place on one date.</p>
+<p><strong>Fact vs dimension?</strong> Fact = events with numbers (fail_count, violation_count). Dimension = descriptions (date, facility, type, result, location).</p>
+<p><strong>Why a star schema?</strong> Small fact table, each description stored once, every question is a simple join. The snowflake needed 9 joins instead of 3 and was about twice as slow.</p>
+<p><strong>What is a fact constellation?</strong> Two fact tables sharing dimensions; our second is one place per year, which made yearly questions about 7× faster.</p>
+<p><strong>Surrogate key?</strong> A simple number the warehouse assigns (facility_key = 4927); small, fast, independent of the city's ids.</p>
+<p><strong>What is the Unknown row?</strong> Row 0 in every dimension, so a missing value never drops a fact.</p>
+<p><strong>What is ETL here?</strong> Extract: COPY the clean file into staging. Transform + Load: one SQL procedure adds new places and inserts facts with looked-up keys.</p>
+<p><strong>Initial vs incremental load?</strong> Initial: Jan 2022-Nov 2025 (60,608). Incremental: only Dec 2025 (1,129), without rebuilding.</p>
+<p><strong>How do you know it's correct?</strong> Five checks after each load, all 0: no missing keys, no duplicates, nothing left in staging, totals match, the two facts agree.</p>
+<p><strong>Why indexes?</strong> A lookup went from about 6.5 ms to 0.5 ms.</p>
+<p><strong>What is OLAP?</strong> Same numbers at different levels: roll-up (month → year), drill-down, slice (one value), dice (several), pivot (rows → columns), CUBE (all subtotals).</p>
+<p><strong>How did you do roll-up in SQL?</strong> <code>GROUP BY ROLLUP (year, quarter)</code>.</p>
+<p><strong>Why HTML dashboard, not Power BI?</strong> Opens anywhere, reads the same warehouse, has the four required sections.</p>
+<h2 id="parts-g-h-i-models-vishwaraj">Parts G, H, I: models (Vishwaraj)</h2>
+<p><strong>What data do the models use?</strong> One table built from the warehouse, where each inspection also has the previous inspection's result, violations and days since (SQL LAG).</p>
+<p><strong>Why split by time?</strong> A random split would let the model see the future. Train on the past, test on 2025.</p>
+<p><strong>Regression result?</strong> MAE 2.45 vs 2.71 for guessing the average; R² 0.12.</p>
+<p><strong>Why is R² low?</strong> The real causes (cleanliness, staff) are not in the data.</p>
+<p><strong>What is one-hot encoding?</strong> Turning a word column into 0/1 columns, one per value.</p>
+<p><strong>Support / confidence / lift?</strong> How often together / how often the rule is true / how many times more than chance.</p>
+<p><strong>Best rule?</strong> 10+ violations ⇒ Fail: 69% confidence, lift 3.0.</p>
+<p><strong>Apriori vs FP-Growth?</strong> Same 1,198 itemsets; Apriori grows sets level by level, FP-Growth uses a tree without generating candidates.</p>
+<p><strong>Decision tree result?</strong> AUC 0.635; at cut-off 0.217 it catches 61% of fails.</p>
+<p><strong>Why not accuracy?</strong> Always saying &quot;pass&quot; is already 79% accurate.</p>
+<p><strong>What is overfitting?</strong> Memorising training data: a depth-20 tree scored 0.85 on training but 0.57 on 2024.</p>
+<p><strong>Most important input?</strong> Whether the previous inspection failed.</p>
+<p><strong>Why change the cut-off from 0.5?</strong> Only about 21% fail, so the tree rarely says above 50%; at 0.5 it caught only 4% of fails.</p>
+<h2 id="parts-d-e-j-citus-and-real-time-rushi">Parts D, E, J: Citus and real-time (Rushi)</h2>
+<p><strong>What is Citus?</strong> An extension that turns PostgreSQL into a cluster: one coordinator, two workers.</p>
+<p><strong>What is a shard?</strong> One of 32 pieces of the fact table; 16 per worker.</p>
+<p><strong>Reference table?</strong> A small table copied to every node so joins stay local; all dimensions are reference tables.</p>
+<p><strong>Why facility_key as distribution key?</strong> 17,084 values, spreads rows evenly; date and location gave skewed shards.</p>
+<p><strong>Is Citus faster?</strong> All 25 test queries gave identical answers; slower on small data (coordination), mostly faster from about 500,000 rows. Our nodes share one laptop.</p>
+<p><strong>Where do rows above 61,737 come from?</strong> Copies of real rows, only to time queries, never for analysis.</p>
+<p><strong>Is the real-time part live?</strong> No, a labelled replay of Oct-Dec 2025, because the city's data is historical.</p>
+<p><strong>What does each tool do?</strong> Kafka holds messages, Spark checks and counts them every 2 s, ClickHouse stores them, Grafana shows them every 5 s.</p>
+<p><strong>Bad messages?</strong> Go to <code>invalid_events</code> with a reason; all 24 test messages were caught.</p>
+<p><strong>How fast?</strong> About 1.8 seconds from sending to Grafana.</p>
+<p><strong>Which warehouse would you recommend?</strong> Batch as the main system; real-time only for live monitoring; Citus only when data outgrows one server.</p>
+<p><strong>Hardest part?</strong> Citus had no package for our Ubuntu version, so we built it from source.</p>
+<h2 id="if-you-dont-know">If you don't know</h2>
+<p>Say: <em>&quot;That part was done by [name], they can explain it better,&quot;</em> and look at them.</p>
+</main></body></html>

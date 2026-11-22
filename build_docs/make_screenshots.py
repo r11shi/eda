@@ -47,9 +47,16 @@ def trim(path, margin=24, keep_height=None):
 
 
 def edge_shot(url, out, width, height, keep_height=None):
-    subprocess.run([EDGE, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=1.5",
-                    f"--window-size={width},{height}", "--virtual-time-budget=8000", f"--screenshot={out}", url],
-                   check=True, capture_output=True, timeout=120)
+    for attempt in range(4):        # headless Edge occasionally exits without writing the file: try again
+        profile = Path(tempfile.gettempdir()) / f"fs_edge_profile_{out.stem}_{attempt}"     # a fresh profile: works while Edge is open
+        subprocess.run([EDGE, "--headless=new", f"--user-data-dir={profile}",
+                        "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=1.5",
+                        f"--window-size={width},{height}", "--virtual-time-budget=8000", f"--screenshot={out}", url],
+                       capture_output=True, timeout=120)
+        if out.exists():
+            break
+    else:
+        raise RuntimeError(f"Edge did not write {out.name}")
     if "grafana" not in out.name and "jupyter" not in out.name:
         trim(out)
     elif keep_height:
@@ -58,13 +65,32 @@ def edge_shot(url, out, width, height, keep_height=None):
 
 
 def terminal(name, cmd, text, title="Ubuntu (WSL) - bash", prompt="root@laptop:~/eda$"):
-    """Draw real console text in a terminal window and save it as a PNG."""
-    lines = text.rstrip("\n").splitlines()
-    page = TERM.replace("__TITLE__", title).replace("__PROMPT__", prompt).replace("__CMD__", html.escape(cmd)).replace("__TEXT__", html.escape("\n".join(lines)))
-    tmp = Path(tempfile.gettempdir()) / f"fs_term_{name}.html"
-    tmp.write_text(page, encoding="utf-8")
-    width = min(1500, max(820, 9 * max(len(x) for x in lines + [cmd]) + 120))
-    edge_shot(tmp.as_uri(), OUT / f"{name}.png", width, 110 + 19 * len(lines))
+    """Draw real console text in a terminal window and save it as a PNG (drawn with Pillow, no browser needed)."""
+    from PIL import Image, ImageDraw, ImageFont
+    lines = text.rstrip("\n").replace("\t", "    ").splitlines()
+    fonts = Path("C:/Windows/Fonts")
+    mono = ImageFont.truetype(str(fonts / "consola.ttf") if (fonts / "consola.ttf").exists() else "DejaVuSansMono.ttf", 20)
+    ui = ImageFont.truetype(str(fonts / "segoeui.ttf") if (fonts / "segoeui.ttf").exists() else "DejaVuSans.ttf", 18)
+    cw, lh, pad, bar, margin = mono.getlength("M"), 27, 26, 44, 33
+    first = f"{prompt} {cmd}"
+    w = int(max(mono.getlength(x) for x in lines + [first]) + 2 * pad)
+    h = bar + pad + lh * (len(lines) + 1) + pad
+    im = Image.new("RGB", (w + 2 * margin, h + 2 * margin), "#e9ecef")
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle((margin, margin, margin + w, margin + h), 15, fill="#1e1f24")
+    d.rounded_rectangle((margin, margin, margin + w, margin + bar + 10), 15, fill="#2b2d33")
+    d.rectangle((margin, margin + bar, margin + w, margin + bar + 10), fill="#1e1f24")
+    for i, c in enumerate(("#ff5f57", "#febc2e", "#28c840")):
+        x = margin + 24 + i * 26; d.ellipse((x - 9, margin + bar / 2 - 9, x + 9, margin + bar / 2 + 9), fill=c)
+    d.text((margin + 110, margin + bar / 2), title, font=ui, fill="#9aa0a6", anchor="lm")
+    y = margin + bar + pad
+    d.text((margin + pad, y), prompt, font=mono, fill="#7ee787")
+    d.text((margin + pad + mono.getlength(prompt + " "), y), cmd, font=mono, fill="#79c0ff")
+    for line in lines:
+        y += lh
+        d.text((margin + pad, y), line, font=mono, fill="#d7dae0")
+    im.save(OUT / f"{name}.png")
+    print("  ", f"{name}.png")
 
 
 def log(name):

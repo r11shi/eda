@@ -142,8 +142,14 @@ case "$MODE" in
     sync_code
     dashboards
     banner ;;
+  replay)          # live demo: empty ClickHouse, then send the Oct-Dec 2025 inspections again (slowly, so Grafana fills up while you watch)
+    cd "$P"
+    for t in inspection_events invalid_events window_agg daily_event_time_agg; do
+      curl -s http://127.0.0.1:8123/ --data-binary "TRUNCATE TABLE IF EXISTS food.$t" >/dev/null; done
+    say "Replaying 3,647 inspections at ${RATE:-25} events/s. Watch http://localhost:3000/d/food-safety-rt"
+    python streaming/producer.py --from 2025-10-01 --to 2025-12-31 --rate "${RATE:-25}" --bad-every 150 ;;
   stop)
     stop_stream ;;
   *)
-    echo "usage: run_everything_wsl.sh install|full|start|dashboards|stop"; exit 1 ;;
+    echo "usage: run_everything_wsl.sh install|full|start|dashboards|replay|stop"; exit 1 ;;
 esac

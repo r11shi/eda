@@ -1,0 +1,23 @@
+$ jupyter nbconvert --execute notebooks/08_association_mining.ipynb
+Mart rows (completed inspections): 61,737
+Transactions used: 61,185
+Items: 35 | average items per transaction: 7.0
+Most frequent items (support):
+Risk=High                     0.816
+FacilityType=Restaurant       0.694
+Result=Pass                   0.617
+Area=Northwest                0.527
+InspType=Routine (Canvass)    0.504
+Violations=Medium (3-5)       0.298
+Apriori: 1198 frequent itemsets in 1.78 s
+Rules with confidence >= 0.30: 3951  (with lift > 1.2: 986)
+FP-Growth: 1198 frequent itemsets in 0.83 s | identical to Apriori: True
+Rules before filtering: 275 | after removing definitional and redundant rules: 41
+
+                                                                                 Rule  support  confidence  lift
+                                             Risk=Low  =>  FacilityType=Grocery Store    0.025       0.618 6.518
+                                          Violations=Very High (10+)  =>  Result=Fail    0.054       0.688 3.019
+    FacilityType=Restaurant & InspType=License & Result=Pass  =>  Violations=None (0)    0.022       0.492 2.779
+             Area=Northwest & InspType=License & Result=Pass  =>  Violations=None (0)    0.021       0.479 2.706
+FacilityType=Restaurant & Risk=High & Violations=None (0)  =>  InspType=Re-inspection    0.043       0.496 2.099
+                     Area=Southwest & Violations=None (0)  =>  InspType=Re-inspection    0.020       0.447 1.892

@@ -643,7 +643,7 @@ def chapter5():
     h2("5.7 Stage 7: decision tree")
     P("Notebook `09_decision_tree` predicts whether an inspection fails. A tree asks at every node the yes/no question that makes the two resulting groups purer; purity is measured by entropy (ID3), gain ratio (C4.5) or the Gini index (CART). "
       "Scikit-learn builds CART trees. Settings were tuned on the 2024 validation year: maximum depth, minimum samples to split, minimum samples per leaf and cost-complexity pruning. The best validation AUC is about 0.636 on a plateau of nearly equal settings; "
-      "the simplest of the best was chosen (maximum depth 8, 200 samples to split, 200 per leaf). A fully grown tree reaches a training AUC of 0.995 but a validation AUC of 0.525, which shows why the limits are needed.")
+      "the simplest of the best was chosen (maximum depth 8, at least 200 inspections in every leaf). A fully grown tree reaches a training AUC of 0.995 but a validation AUC of 0.525, which shows why the limits are needed.")
     figure(IMG / "nb_09_decision_tree_1.png", "Tuning on the 2024 validation year: training versus validation AUC for each setting", 6.6)
     d = dtm.reset_index()[["Model", "threshold", "Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]]
     d[["Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]] = d[["Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]].astype(float).round(3)

@@ -1,0 +1,35 @@
+$ jupyter nbconvert --execute notebooks/01_data_curation.ipynb
+Rows: 73,630 | Columns: 17
+Date range: 2022-01-03 to 2025-12-31
+Missing values per column:
+Result values:
+results
+Pass                    37749
+Fail                    14261
+Pass w/ Conditions       9744
+Out of Business          5304
+No Entry                 4991
+Not Ready                1562
+Business Not Located       19
+Risk values:
+risk
+Risk 1 (High)      59175
+Risk 2 (Medium)    10878
+Risk 3 (Low)        3522
+All                   38
+NaN                   17
+State values:
+state
+IL     73592
+NaN       25
+IN         8
+CA         3
+CO         1
+WI         1
+City spellings:
+city
+CHICAGO     73317
+Chicago       117
+NaN            52
+chicago        48
+CCHICAGO       13

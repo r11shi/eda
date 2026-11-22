@@ -1,0 +1,17 @@
+$ jupyter nbconvert --execute notebooks/02_eda.ipynb
+Curated rows: 73,601 | Completed inspections: 61,737
+--- result_group
+--- risk_group
+--- facility_group
+--- inspection_type_group
+Top 10 raw-derived facility types:
+Rare facility types (< 0.1% of rows): 184 of 203 categories, together 1336 rows (1.74%)
+Counts behind the first heat map:
+Busiest months : {Period('2024-10', 'M'): 1641, Period('2025-04', 'M'): 1624, Period('2024-04', 'M'): 1611}
+Quietest months: {Period('2022-02', 'M'): 917, Period('2022-01', 'M'): 941, Period('2023-07', 'M'): 1003}
+Hourly / time-band pattern: NOT AVAILABLE (every timestamp is 00:00:00 in the source).
+Coordinates available for 99.62% of completed inspections; none lie outside the Chicago bounding box (validated in curation).
+Top 8 ZIP codes by NUMBER of inspections:
+Top 8 ZIP codes by FAIL RATE (at least 200 inspections):
+
+curated rows: 73601 | completed inspections: 61737 | new columns: 39

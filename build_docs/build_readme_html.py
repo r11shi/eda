@@ -1,8 +1,8 @@
 """Renders README.md as one self-contained, shareable web page (all diagrams and charts embedded, no internet needed except the font).
 
-Writes two files:
-    README.html                         a normal HTML document (double-click to open, send to friends)
-    deliverables/Project_Guide.html     the same page without the <html>/<head> wrapper, for publishing as a shared page
+Pages: README.md (project guide), docs/presentation/TEAM_SCRIPT.md (for the team).
+Each becomes a normal HTML document (double-click to open, send to friends) and, in deliverables/, the same page
+without the <html>/<head> wrapper for publishing as a shared page.
 
     python build_docs/build_readme_html.py          (needs: pip install mistune pillow)
 """
@@ -16,8 +16,6 @@ import mistune
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-md = (ROOT / "README.md").read_text(encoding="utf-8")
-body = mistune.create_markdown(plugins=["table"], escape=False)(md)
 
 
 def slug(text):
@@ -25,9 +23,9 @@ def slug(text):
     return re.sub(r"[^a-z0-9 -]", "", text).replace(" ", "-")
 
 
-def embed(src, alt):
+def embed(base, src, alt):
     """An image from the repository, embedded in the page: SVG diagrams inline (they follow the theme), PNG charts as data URIs."""
-    path = ROOT / src
+    path = (base / src).resolve()
     if not path.exists():
         return f'<p><em>(missing image: {src})</em></p>'
     if path.suffix == ".svg":
@@ -37,15 +35,6 @@ def embed(src, alt):
     buf = io.BytesIO(); im.save(buf, "JPEG", quality=82, optimize=True)
     return f'<img alt="{alt}" loading="lazy" src="data:image/jpeg;base64,{base64.b64encode(buf.getvalue()).decode()}">'
 
-
-body = re.sub(r"<h([1-3])>(.*?)</h\1>", lambda m: f'<h{m.group(1)} id="{slug(m.group(2))}">{m.group(2)}</h{m.group(1)}>', body)
-# image + the "What it shows / Why we made it" note under it -> one <figure>
-body = re.sub(r'<p><img src="([^"]+)" alt="([^"]*)"\s*/?></p>\s*<blockquote>\s*(.*?)\s*</blockquote>',
-              lambda m: f'<figure><div class="fig">{embed(m.group(1), m.group(2))}</div><figcaption><b class="ft">{m.group(2)}</b>{m.group(3)}</figcaption></figure>',
-              body, flags=re.S)
-body = re.sub(r'<p><img src="([^"]+)" alt="([^"]*)"\s*/?></p>', lambda m: f'<figure><div class="fig">{embed(m.group(1), m.group(2))}</div></figure>', body)
-body = body.replace("<table>", '<div class="tw"><table>').replace("</table>", "</table></div>")
-body = body.replace("<pre><code", '<div class="cw"><pre><code').replace("</code></pre>", "</code></pre></div>")
 
 STYLE = """
 /* Layout: one narrow reading column; figures may run a little wider. */
@@ -87,14 +76,33 @@ figcaption p{margin:0 0 2px}figcaption strong{color:var(--ink);font-weight:600}
 .top{color:var(--mute);font-size:13px;margin-bottom:40px}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 """
+def to_html(md_path):
+    base = md_path.parent
+    body = mistune.create_markdown(plugins=["table"], escape=False)(md_path.read_text(encoding="utf-8"))
+    body = re.sub(r"<h([1-3])>(.*?)</h\1>", lambda m: f'<h{m.group(1)} id="{slug(m.group(2))}">{m.group(2)}</h{m.group(1)}>', body)
+    # image + the "What it shows / Why we made it" note under it -> one <figure>
+    body = re.sub(r'<p><img src="([^"]+)" alt="([^"]*)"\s*/?></p>\s*<blockquote>\s*(.*?)\s*</blockquote>',
+                  lambda m: f'<figure><div class="fig">{embed(base, m.group(1), m.group(2))}</div><figcaption><b class="ft">{m.group(2)}</b>{m.group(3)}</figcaption></figure>',
+                  body, flags=re.S)
+    body = re.sub(r'<p><img src="([^"]+)" alt="([^"]*)"\s*/?></p>', lambda m: f'<figure><div class="fig">{embed(base, m.group(1), m.group(2))}</div></figure>', body)
+    body = body.replace("<table>", '<div class="tw"><table>').replace("</table>", "</table></div>")
+    body = body.replace("<pre><code", '<div class="cw"><pre><code').replace("</code></pre>", "</code></pre></div>")
+    return body
+
+
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
          '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">')
-CONTENT = f'<main><div class="top">Project guide · Data Analytics (MDM) · Department of Computer Engineering</div>{body}</main>'
-
-full = (f'<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
-        f'<title>Food Safety Analytics Guide</title>{FONTS}<style>{STYLE}</style></head><body>{CONTENT}</body></html>\n')
-(ROOT / "README.html").write_text(full, encoding="utf-8")
-fragment = (f'<title>Food Safety Analytics Guide</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n{FONTS}\n<style>{STYLE}</style>\n{CONTENT}\n')
-(ROOT / "deliverables").mkdir(exist_ok=True)
-(ROOT / "deliverables" / "Project_Guide.html").write_text(fragment, encoding="utf-8")
-print("written README.html and deliverables/Project_Guide.html", f"{len(full) / 1e6:.1f} MB")
+PAGES = [  # (markdown, title, top line, full page, page for sharing)
+    ("README.md", "Food Safety Analytics Guide", "Study guide · every part in detail", "README.html", "deliverables/Project_Guide.html"),
+    ("docs/presentation/DOUBTS.md", "Food Safety Doubts and Answers", "Doubts and answers", "docs/presentation/Doubts.html", "deliverables/Doubts.html"),
+    ("docs/presentation/TEAM_SCRIPT.md", "Food Safety Team Script", "Team script · 10-minute presentation", "docs/presentation/Team_Script.html", "deliverables/Team_Script.html"),
+]
+for src, title, top, full_out, share_out in PAGES:
+    content = f'<main><div class="top">{top} · Data Analytics (MDM) · Department of Computer Engineering</div>{to_html(ROOT / src)}</main>'
+    full = ('<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
+            f'<title>{title}</title>{FONTS}<style>{STYLE}</style></head><body>{content}</body></html>\n')
+    (ROOT / full_out).write_text(full, encoding="utf-8")
+    (ROOT / share_out).parent.mkdir(exist_ok=True)
+    (ROOT / share_out).write_text(f'<title>{title}</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n{FONTS}\n<style>{STYLE}</style>\n{content}\n',
+                                  encoding="utf-8")
+    print("written", full_out, "and", share_out, f"{len(full) / 1e6:.1f} MB")

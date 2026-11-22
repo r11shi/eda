@@ -1,0 +1,15 @@
+$ jupyter nbconvert --execute notebooks/07_regression.ipynb
+Mart rows: 61,737 | columns: 29
+Train: 45266 inspections (2022-2024) | Test: 15919 inspections (2025)
+Mean violations: train 3.850 | test 3.558
+Share of inspections with a prior inspection: train 67.2% | test 87.8%
+Simple linear regression: ViolationCount = 2.737 + 0.209 x PriorViolationCount   (trained on 30436 inspections with a prior inspection)
+
+                                             Model  Rows   MAE  RMSE     R2
+               Baseline: predict the training mean 15919 2.713 3.505 -0.007
+Baseline (training mean), inspections with a prior 13983 2.642 3.457 -0.000
+                    Simple LR: PriorViolationCount 13983 2.499 3.363  0.053
+                 Multiple LR: all test inspections 15919 2.447 3.276  0.121
+        Multiple LR: test inspections with a prior 13983 2.407 3.227  0.128
+                    Multiple LR (train, 2022-2024) 45266 2.414 3.271  0.248
+                                 Simple LR (train) 30436 2.611 3.530  0.054
