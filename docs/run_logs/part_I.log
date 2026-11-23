@@ -1,0 +1,35 @@
+
+=== PART I: decision tree ===
+Predicts fail / not fail. Tuned on 2024, tested on 2025. Look for AUC, recall and the important inputs.
+
+$ jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=1800 notebooks/09_decision_tree.ipynb 2>&1 | grep -v -i -E 'warning|kernel|nbconvert' || true
+  _validate(nbdict, ref, version, version_minor, relax_add_props)
+
+Mart rows (completed inspections): 61,737
+train 2022-2023  29,693 inspections | fail rate 24.88%
+validation 2024  15,992 inspections | fail rate 21.77%
+test 2025        16,052 inspections | fail rate 21.13%
+Baseline accuracy on the test year (always predict 'not failed'): 0.7887
+Encoded features: 104
+min_samples_leaf (one factor):
+ccp_alpha (one factor):
+420 combinations tried in 84 s
+Selected settings: {'max_depth': 8, 'min_samples_split': 2, 'min_samples_leaf': 200, 'ccp_alpha': 0.0}
+Tree: 54 leaves, depth 8
+Feature importance (top 12):
+=== Path: HIGHEST fail rate (leaf 61)
+   IF prior_inspection_result_Fail <= 0.5
+   ... (more in the notebook)
+$ python -c "import pandas as pd; d=pd.read_csv('results/decision_tree_metrics.csv'); print(d[['Model','threshold','Accuracy','Precision','Recall','ROC-AUC']].round(3).to_string(index=False)); print(); print(pd.read_csv('results/decision_tree_importance.csv', index_col=0).head(5).round(3).to_string())"
+                                      Model threshold  Accuracy  Precision  Recall  ROC-AUC
+              Baseline: always 'not failed'         -     0.789      0.000   0.000    0.500
+               Decision tree, threshold 0.5       0.5     0.784      0.380   0.039    0.635
+Decision tree, validation-optimal threshold     0.217     0.600      0.289   0.611    0.635
+
+                              importance
+prior_inspection_result_Fail       0.294
+inspection_type_Complaint          0.147
+prior_violation_count              0.128
+days_since_prior_inspection        0.100
+zip_60617                          0.052
+

@@ -1,129 +1,94 @@
-"""Adds a short plain-language note before every code cell of the five notebooks: what the cell does and what to look for.
+"""Adds short notes to the five notebooks, written as what we did, plus a one-line comment at the top of each code cell.
 
-The notes are markdown cells tagged with metadata {"plain_note": true}; running this again replaces them instead of adding copies.
+Before every code cell: a markdown note "What we did here: ... Result: ...".
+At the top of every code cell: one comment line "# ...".
+Both are tagged, so running this again replaces them instead of adding copies.
     python build_docs/add_notebook_notes.py
 """
 import json
 from pathlib import Path
 
 NB = Path(__file__).resolve().parents[1] / "notebooks"
+TAG = "# >> "          # our comment lines start with this, so they can be found and replaced
 
+# (what we did, the result, the one-line code comment) for every code cell, in order
 NOTES = {
     "01_data_curation": [
-        ("Load the tools and the raw file. `curation.py` holds all our cleaning rules, so the warehouse ETL uses exactly the same logic.",
-         "73,630 rows and 17 columns; the date range 2022-01-03 to 2025-12-31."),
-        ("**Profiling, step 1:** count the missing values in every column before changing anything.",
-         "which columns have gaps (for example violations is empty for clean passes and for visits that never happened)."),
-        ("**Profiling, step 2:** list the actual values of the key columns, to find invalid codes and spelling variants.",
-         "results such as 'Out of Business' (not real inspections), risk 'All' (invalid), 'Chicago' spelled 5 ways, 217 facility types."),
-        ("**Cleaning.** `cur.curate()` applies every rule and returns the clean data plus a log: one row per problem, with the count, the treatment and the reason.",
-         "the cleaning-log table. This is the table to show when someone asks 'how did you clean the data?'."),
-        ("**Reconciliation:** compare the counts before and after cleaning, so we can prove nothing disappeared without a reason.",
-         "every result type keeps its count except the 29 removed duplicate reports."),
-        ("**Derived attributes:** the new columns we created and the exact rule for each one (the brief asks us to document them).",
-         "violation count, violation band, result group, risk group, facility group, area, season, and their formulas."),
-        ("Check the facility grouping: how the 217 hand-typed facility types fall into 7 groups.",
-         "almost every row lands in a real group; only a handful are 'Other'."),
-        ("Save the clean file. Everything after this (the warehouse, EDA, the real-time replay) reads `data/curated/inspections_curated.csv`.",
-         "'Saved 73,601 curated rows'."),
+        ("We loaded the raw Chicago file and our cleaning rules from `etl/curation.py`.", "73,630 rows, 17 columns, dated 2022-01-03 to 2025-12-31.", "load the raw file"),
+        ("We counted the missing values in every column, before changing anything.", "gaps are mostly in violations (clean passes and visits that never happened have no text).", "profiling: missing values"),
+        ("We listed the real values of the key columns to find wrong codes and spellings.", "visits that never happened (Out of Business, No Entry), a wrong risk value 'All', Chicago spelled 5 ways, 217 facility types.", "profiling: values of the key columns"),
+        ("We applied every cleaning rule and kept a log of each one: the problem, how many rows, what we did and why.", "the cleaning-log table below.", "clean the data and keep a log of every rule"),
+        ("We compared the counts before and after cleaning.", "every result keeps its count except the 29 duplicate reports we removed.", "check counts before vs after cleaning"),
+        ("We listed the new columns we created and the rule behind each one.", "violation count and band, result group, risk group, facility group, area, season.", "the new (derived) columns and their rules"),
+        ("We checked how the 217 facility types fell into our 7 groups.", "almost every row is in a real group; only a handful are 'Other'.", "check the facility groups"),
+        ("We saved the clean file that the warehouse, the EDA and the real-time replay use.", "73,601 clean rows saved.", "save the clean file"),
     ],
     "02_eda": [
-        ("Load the clean file. `comp` = only the completed inspections (61,737), which is what we analyse.",
-         "the row counts: 73,601 curated, 61,737 completed."),
-        ("**Numerical analysis:** mean, median, quartiles, spread, skewness of the violation count and other numbers.",
-         "violation count: mean about 3.8, median 3; strongly right-skewed (a long tail of high counts)."),
-        ("Draw histograms and box plots of the numbers.",
-         "most inspections have 0-5 violations; fails have clearly more violations than passes; dots = outliers."),
-        ("**Categorical analysis:** how often each category appears (frequency and percentage).",
-         "Pass is about half of all rows; restaurants dominate the facility types; many rare types."),
-        ("Cross-tabulate categories with the result: the result mix inside each facility group, risk group and inspection type.",
-         "complaint inspections have a much larger red (fail) share."),
-        ("**Temporal analysis:** inspections per year, quarter, month, week and weekday, and the fail rate per month.",
-         "volume grows a little each year; weekends are almost empty; no strong seasonal peak."),
-        ("**Geographic analysis:** check the coordinates and count inspections and fails by ZIP code.",
-         "99.6% of inspections have valid coordinates inside Chicago."),
-        ("Draw the map of inspections and the ZIP volume-vs-fail-rate chart.",
-         "busy ZIP codes are not always the ones with the highest fail rate."),
-        ("**Outcome analysis:** compare absolute counts with rates per facility group (the brief asks us not to confuse volume with rate).",
-         "restaurants have the most fails simply because they have the most inspections, not the highest rate."),
+        ("We loaded the clean file and kept the completed inspections for the analysis.", "73,601 clean rows, 61,737 completed inspections.", "load the clean file"),
+        ("We summarised the numbers: average, middle value, spread, quartiles.", "violations: average about 3.8, middle value 3, a long tail of high counts.", "numbers: summary statistics"),
+        ("We drew histograms and box plots of the numbers.", "most inspections have 0-5 violations; fails have more than passes; the dots are outliers.", "numbers: histograms and box plots"),
+        ("We counted how often each category appears.", "about half of all rows are passes; restaurants are by far the largest type.", "categories: counts and percentages"),
+        ("We compared the result mix inside each facility group, risk group and inspection type.", "complaint inspections have a much larger share of fails.", "categories: result mix per group"),
+        ("We looked at time: per year, quarter, month, week and weekday, and the fail rate per month.", "slow growth each year, empty weekends, no strong season.", "time: trends"),
+        ("We checked the coordinates and counted inspections and fails per ZIP code.", "99.6% of inspections have valid coordinates inside Chicago.", "places: coordinates and ZIP codes"),
+        ("We drew the map and compared ZIP codes by volume and fail rate.", "busy ZIP codes are not always the ones with the highest fail rate.", "places: map and ZIP comparison"),
+        ("We compared counts with rates for each facility group.", "restaurants have the most fails because they have the most inspections, not the highest rate.", "outcomes: counts vs rates"),
     ],
     "07_regression": [
-        ("Load the tools and read the analytics table (the mart) **from the warehouse**, not from the raw file.",
-         "'Mart rows: 61,737' and a preview of the columns, including the previous-inspection columns."),
-        ("Prepare the data: keep inspections with a known violation count, fill missing history with 0 plus a 'no prior inspection' flag, and **split by time**: train 2022-2024, test 2025.",
-         "45,266 training and 15,919 test inspections."),
-        ("Define the encoder (words → 0/1 columns, one-hot) and fit the **baseline** (always predict the average) and the **simple regression** (one input: previous violation count).",
-         "the simple equation: violations = 2.737 + 0.209 × previous violations."),
-        ("Fit the **multiple regression** on all inputs and score both models on 2025 with MAE, MSE, RMSE and R².",
-         "the results table: MAE 2.45 (model) vs 2.71 (guessing), R² 0.12."),
-        ("Draw actual vs predicted, residuals vs predicted, and the distribution of the errors.",
-         "points spread widely around the line = the model is weak; errors are centred near 0."),
-        ("List the largest coefficients: which inputs push the predicted count up or down.",
-         "some ZIP codes and the previous inspection's result/violations have the biggest effects."),
-        ("**Diagnostics, part 1:** VIF checks whether inputs are too similar to each other (multicollinearity); Breusch-Pagan checks whether the error size is constant.",
-         "only 5 of 102 inputs have VIF > 5 (acceptable); Breusch-Pagan p ≈ 0 means the error size changes (heteroscedasticity)."),
-        ("**Diagnostics, part 2:** how much the extreme counts (outliers) affect the error.",
-         "1.9% of inspections are outliers but cause about 25% of the squared error."),
+        ("We read the analytics table from the warehouse (not from the raw file).", "61,737 rows, each with the previous inspection of the same place.", "read the analytics table from the warehouse"),
+        ("We kept inspections with a known violation count, filled missing history, and split by time: 2022-2024 to learn, 2025 to test.", "45,266 training and 15,919 test inspections.", "prepare the data and split by time"),
+        ("We turned word columns into 0/1 columns and fitted the baseline (always the average) and the simple regression (previous violations only).", "violations = 2.737 + 0.209 × previous violations.", "baseline and simple regression"),
+        ("We fitted the multiple regression on all inputs and scored every model on 2025.", "MAE 2.45 (model) vs 2.71 (guessing), R² 0.12.", "multiple regression and the scores"),
+        ("We plotted actual against predicted values and the errors.", "points spread widely: the model is weak; errors centre near 0.", "charts of the predictions and errors"),
+        ("We listed the inputs with the biggest effect.", "some ZIP codes and the previous inspection matter most.", "largest effects (coefficients)"),
+        ("We checked whether inputs overlap too much (VIF) and whether the error size is even (Breusch-Pagan).", "only 5 of 102 inputs overlap noticeably; the error size is not even.", "diagnostics: overlap and error spread"),
+        ("We measured how much the extreme counts affect the error.", "1.9% of inspections cause about 25% of the squared error.", "diagnostics: outliers"),
     ],
     "08_association_mining": [
-        ("Load the tools and read the analytics table from the warehouse.",
-         "'Mart rows (completed inspections): 61,737'."),
-        ("Build the **transactions**: each inspection becomes a basket of 7 items (facility type, risk, inspection type, result, violation band, area, season), then one-hot encode them (one True/False column per item).",
-         "61,185 transactions, 35 different items, exactly 7 items per basket."),
-        ("Count how often each single item appears (its **support**) and plot it.",
-         "Risk=High 0.82, FacilityType=Restaurant 0.69, Result=Pass 0.62."),
-        ("Run **Apriori** with minimum support 2% and make rules with minimum confidence 30%.",
-         "1,198 frequent itemsets (28 singles, 223 pairs, 441 triples ...), 3,951 rules."),
-        ("Run **FP-Growth** with the same settings and check that it finds exactly the same itemsets.",
-         "'identical to Apriori: True' and the two run times."),
-        ("**Select meaningful rules:** keep support ≥ 2%, confidence ≥ 30%, lift ≥ 1.3; remove rules that are true by definition (e.g. Fail ⇒ has violations) or that repeat a shorter rule.",
-         "275 candidate rules → 41 after cleaning → the 14 we report."),
-        ("Plot all rules by support (x), confidence (y) and lift (colour).",
-         "most rules have low support; the high-lift rules are the bright dots."),
-        ("The final rules with a plain-language interpretation and a possible use for each.",
-         "10+ violations ⇒ Fail (69%, lift 3.0); Low risk ⇒ Grocery Store (62%, lift 6.5)."),
+        ("We read the analytics table from the warehouse.", "61,737 completed inspections.", "read the analytics table from the warehouse"),
+        ("We turned each inspection into a basket of 7 items (type, risk, inspection type, result, violation band, area, season).", "61,185 baskets, 35 different items.", "build the baskets (transactions)"),
+        ("We counted how often each single item appears.", "Risk=High 82%, Restaurant 69%, Pass 62%.", "how often each item appears (support)"),
+        ("We ran Apriori with minimum support 2% and made rules with confidence of at least 30%.", "1,198 frequent item sets, 3,951 rules.", "Apriori and the rules"),
+        ("We ran FP-Growth with the same settings and compared it with Apriori.", "the same 1,198 item sets ('identical to Apriori: True').", "FP-Growth, compared with Apriori"),
+        ("We kept the useful rules: lift at least 1.3, no rules that are true by definition or repeat a shorter rule.", "275 → 41 → the 14 rules we report.", "select the meaningful rules"),
+        ("We plotted every rule by support, confidence and lift.", "most rules are rare; the strongest ones stand out in colour.", "chart of all rules"),
+        ("We wrote what each selected rule means and how it could be used.", "10+ violations ⇒ Fail (69%, lift 3.0); low risk ⇒ grocery store (62%, lift 6.5).", "the final rules and their meaning"),
     ],
     "09_decision_tree": [
-        ("Load the tools and read the analytics table from the warehouse.",
-         "'Mart rows (completed inspections): 61,737'."),
-        ("Prepare inputs known **before** the visit and **split by time**: train 2022-2023, validation 2024 (for tuning), test 2025 (used once at the end).",
-         "the three sizes and fail rates (about 25%, 22%, 21%), and the baseline accuracy 0.789 of always saying 'not failed'."),
-        ("Encode the inputs and test each tree setting **one at a time** (depth, minimum split size, minimum leaf size, pruning) on 2024.",
-         "for max_depth: the training AUC keeps rising but the 2024 AUC peaks and then falls = **overfitting**."),
-        ("Show the one-setting-at-a-time tables and plot training vs validation AUC.",
-         "the gap between the blue (train) and orange (validation) lines growing with depth."),
-        ("**Grid search:** try all 420 combinations of the four settings and keep the one with the best 2024 AUC.",
-         "the best settings (depth 8, at least 200 rows per leaf) and a validation AUC of about 0.636."),
-        ("**Final model:** refit on 2022-2024, score once on 2025 with the default cut-off 0.5 and with the cut-off chosen on 2024.",
-         "AUC 0.635; recall 4% at cut-off 0.5 but 61% at cut-off 0.217."),
-        ("Draw the two confusion matrices and the ROC curve.",
-         "the 0.217 matrix catches many more real fails (bottom-right box)."),
-        ("**Feature importance:** which inputs the tree uses most.",
-         "previous result = Fail is the most important, then complaint inspection, then previous violation count."),
-        ("Draw the top 3 levels of the trained tree.",
-         "each box: the question, how many inspections reach it, and how many failed."),
-        ("Print three real paths through the tree (highest fail rate, lowest, largest group) and check them on 2025.",
-         "the highest-risk path fails 55-58% of the time; the lowest 4-5%."),
+        ("We read the analytics table from the warehouse.", "61,737 completed inspections.", "read the analytics table from the warehouse"),
+        ("We kept inputs known before the visit and split by time: 2022-23 to learn, 2024 to tune, 2025 to test once.", "about 25%, 22% and 21% of inspections fail; always saying 'pass' is 78.9% accurate.", "prepare the inputs and the three-way time split"),
+        ("We tried each tree setting on its own and scored it on 2024.", "deeper trees score higher on training data but lower on 2024 (overfitting).", "try each setting on its own"),
+        ("We showed those results as tables and charts.", "the training and 2024 lines drift apart as the tree gets deeper.", "tables and charts of the settings"),
+        ("We tried all 420 combinations of settings and kept the best one on 2024.", "depth 8, at least 200 inspections per leaf, 2024 AUC about 0.636.", "grid search: 420 combinations"),
+        ("We retrained on 2022-2024, tested once on 2025, and chose the cut-off on 2024.", "AUC 0.635; 4% of fails caught at cut-off 0.5, 61% at 0.217.", "final model and the 2025 scores"),
+        ("We drew the confusion matrices and the ROC curve.", "the 0.217 cut-off catches many more real fails.", "confusion matrices and ROC curve"),
+        ("We listed which inputs the tree uses most.", "previous result = Fail, then complaint inspection, then previous violations.", "most important inputs"),
+        ("We drew the top three levels of the tree.", "each box shows the question, how many inspections reach it, and how many failed.", "draw the tree"),
+        ("We followed three real paths through the tree and checked them on 2025.", "highest-risk path fails 55-58%, lowest 4-5%.", "three real decision paths"),
     ],
 }
 
 
-def note_cell(text, look):
+def note_cell(did, result):
     return {"cell_type": "markdown", "metadata": {"plain_note": True},
-            "source": [f"> **In plain words:** {text}  \n", f"> **Look for:** {look}"]}
+            "source": [f"**What we did here:** {did}  \n", f"**Result:** {result}"]}
 
 
 for name, notes in NOTES.items():
     path = NB / f"{name}.ipynb"
     nb = json.loads(path.read_text(encoding="utf-8"))
     cells = [c for c in nb["cells"] if not c.get("metadata", {}).get("plain_note")]
-    code_idx = [i for i, c in enumerate(cells) if c["cell_type"] == "code"]
-    assert len(code_idx) == len(notes), f"{name}: {len(code_idx)} code cells, {len(notes)} notes"
+    code = [c for c in cells if c["cell_type"] == "code"]
+    assert len(code) == len(notes), f"{name}: {len(code)} code cells, {len(notes)} notes"
     out, k = [], 0
     for c in cells:
         if c["cell_type"] == "code":
-            out.append(note_cell(*notes[k])); k += 1
+            did, result, comment = notes[k]; k += 1
+            out.append(note_cell(did, result))
+            src = "".join(c["source"]).split("\n")
+            src = [l for l in src if not l.startswith(TAG)]                  # remove our old comment
+            c["source"] = [l + "\n" for l in [TAG + comment] + src[:-1]] + [src[-1]] if src else [TAG + comment]
         out.append(c)
     nb["cells"] = out
     path.write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"{name}: {k} notes")
+    print(f"{name}: {k} cells annotated")

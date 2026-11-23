@@ -38,5 +38,5 @@ default_home_dashboard_path = $R/dashboards/food_safety_realtime_dashboard.json
 reporting_enabled = false
 check_for_updates = false
 INI
-( cd "$G"; exec nohup ./bin/grafana server --homepath "$G" --config "$R/custom.ini" ) > "$ROOT/runtime/logs/grafana.stdout" 2>&1 &
+( cd "$G"; exec setsid nohup ./bin/grafana server --homepath "$G" --config "$R/custom.ini" ) > "$ROOT/runtime/logs/grafana.stdout" 2>&1 &
 sleep 12; curl -s http://127.0.0.1:3000/api/health

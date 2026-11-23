@@ -1,0 +1,44 @@
+
+=== PART H: association rules ===
+Apriori and FP-Growth on 61,185 inspections. Look for the itemset count and the rules table.
+
+$ jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=1800 notebooks/08_association_mining.ipynb 2>&1 | grep -v -i -E 'warning|kernel|nbconvert' || true
+  _validate(nbdict, ref, version, version_minor, relax_add_props)
+
+Mart rows (completed inspections): 61,737
+Transactions used: 61,185 | top facility types kept: ['Restaurant', 'Grocery Store', 'School', "Children's Services Facility", 'Daycare Above And Under 2 Years', 'Bakery', 'Long Term Care', 'Daycare (2 - 6 Years)']
+Items: 35 | average items per transaction: 7.0
+Most frequent items (support):
+Risk=High                     0.816
+FacilityType=Restaurant       0.694
+Result=Pass                   0.617
+Area=Northwest                0.527
+InspType=Routine (Canvass)    0.504
+Violations=Medium (3-5)       0.298
+Area=Southwest                0.293
+Violations=Low (1-2)          0.280
+Season=Spring                 0.270
+Season=Autumn                 0.260
+Season=Summer                 0.246
+InspType=Re-inspection        0.236
+Apriori: 1198 frequent itemsets in 0.50 s
+size
+1     28
+2    223
+3    441
+4    372
+5    126
+6      8
+
+Rules with confidence >= 0.30: 3951  (with lift > 1.2: 986)
+FP-Growth: 1198 frequent itemsets in 0.61 s | identical to Apriori: True
+Rules before filtering: 275 | after removing definitional and redundant rules: 41
+$ python -c "import pandas as pd; r=pd.read_csv('results/association_rules_selected.csv'); print(r[['Rule','support','confidence','lift']].head(6).round(3).to_string(index=False))"
+                                                                                 Rule  support  confidence  lift
+                                             Risk=Low  =>  FacilityType=Grocery Store    0.025       0.618 6.518
+                                          Violations=Very High (10+)  =>  Result=Fail    0.054       0.688 3.019
+    FacilityType=Restaurant & InspType=License & Result=Pass  =>  Violations=None (0)    0.022       0.492 2.779
+             Area=Northwest & InspType=License & Result=Pass  =>  Violations=None (0)    0.021       0.479 2.706
+FacilityType=Restaurant & Risk=High & Violations=None (0)  =>  InspType=Re-inspection    0.043       0.496 2.099
+                     Area=Southwest & Violations=None (0)  =>  InspType=Re-inspection    0.020       0.447 1.892
+

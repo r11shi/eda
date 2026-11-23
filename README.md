@@ -314,6 +314,11 @@ Open notebook 01 and 02 (links above) and read the grey notes. Menu **1** re-run
 > **How to read it:** the blue box in the middle is the **fact table**: one row per inspection, holding only keys and numbers. Each arrow points to a **dimension** that the key looks up: **when** (dim_date), **which place** (dim_facility), **why** (dim_inspection_type), **result** (dim_result), **where** (dim_location). The small text under each name is what one row means and how many rows there are. The green box on the right is the **second fact table** (one place per year); its dashed arrow shows it shares dim_facility, which is what makes it a fact constellation.  
 > **Why we made it:** a warehouse is designed on paper first; this is our design.
 
+![The schema in detail](docs/images/diagrams/schema_er.svg)
+
+> **How to read it:** every table of the warehouse with its real columns. Blue = dimension tables, orange = fact tables. **PK** = primary key (the row's ID), **FK** = foreign key (an ID that points to a dimension). Each line goes from a key in a fact table to the dimension it points to. Both fact tables point to **DimFacility**, which is what makes this a fact constellation.  
+> **Why we made it:** the exact structure of the database, the same one pgAdmin shows with *ERD For Schema*.
+
 ### The code
 
 The fact table (`sql/01_schema.sql`):

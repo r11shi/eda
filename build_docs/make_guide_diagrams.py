@@ -74,14 +74,16 @@ d.box("raw", 10, 20, 120, 56, "Raw CSV", sub="73,630 rows")
 d.box("clean", 160, 20, 130, 56, "Clean (Python)", sub="notebook 01")
 d.box("stg", 320, 20, 120, 56, "Staging table", sub="waiting room")
 d.box("dw", 470, 14, 240, 68, "Batch warehouse", "main", "PostgreSQL · star schema")
-d.box("olap", 360, 150, 110, 56, "SQL & OLAP", sub="10 questions")
-d.box("dash", 485, 150, 105, 56, "Dashboard", sub="HTML page")
-d.box("ml", 605, 150, 105, 56, "3 models", sub="notebooks 07-09")
+d.box("olap", 320, 150, 115, 56, "SQL & OLAP", sub="10 questions")
+d.box("dash", 450, 150, 110, 56, "Dashboard", sub="HTML page")
+d.box("ml", 575, 150, 110, 56, "3 models", sub="notebooks 07-09")
 d.box("citus", 470, 262, 240, 56, "Distributed copy", "good", "Citus · 3 nodes")
 d.box("rt", 10, 262, 420, 56, "Real-time copy: Kafka → Spark → ClickHouse → Grafana", "bad", "past inspections replayed as live events")
 for a, b in [("raw", "clean"), ("clean", "stg"), ("stg", "dw"), ("dw", "olap"), ("dw", "dash"), ("dw", "ml")]:
     d.arrow(a, b)
-d.arrow("dw", "citus", dashed=True); d.arrow("clean", "rt", dashed=True)
+# dashed copies: routed around the boxes so no line crosses another box
+d.parts.append(f'<line x1="702" y1="82" x2="702" y2="258" marker-end="url(#ah)" style="stroke:{MUTE};stroke-width:1.6;stroke-dasharray:5 4"/>')
+d.parts.append(f'<line x1="225" y1="76" x2="225" y2="258" marker-end="url(#ah)" style="stroke:{MUTE};stroke-width:1.6;stroke-dasharray:5 4"/>')
 d.text(10, 342, "blue = the main warehouse · dashed = the same data copied into the other two warehouses", 11.5)
 d.save("pipeline")
 
@@ -195,3 +197,50 @@ d.box("g", 606, 20, 106, 52, "Grafana", sub="every 5 s")
 d.arrow("p", "k"); d.arrow("k", "s"); d.arrow("s", "ch", "valid"); d.arrow("s", "bad", "broken"); d.arrow("ch", "g")
 d.text(8, 190, "About 1.8 seconds from sending an event to seeing it on the Grafana dashboard.", 11.5)
 d.save("streaming")
+
+
+# 12. the full schema (ER diagram): every table with its columns, keys and links
+def er_table(d, x, y, w, name, cols, kind):
+    """A table box: name band + one row per column. Returns {column: y of that row} for drawing links."""
+    head, row = 30, 21
+    h = head + row * len(cols) + 8
+    fill = "var(--d-tint,#eaf0fd)" if kind == "dim" else "var(--d-tint3,#fbeae4)"
+    edge = ACC if kind == "dim" else WARM
+    d.parts.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" style="fill:{BOX};stroke:{edge};stroke-width:1.5"/>')
+    d.parts.append(f'<path d="M{x},{y + 8} a8,8 0 0 1 8,-8 h{w - 16} a8,8 0 0 1 8,8 v{head - 8} h-{w} z" style="fill:{fill};stroke:{edge};stroke-width:1.5"/>')
+    d.text(x + w / 2, y + 20, name, 13.5, 700, INK, "middle")
+    rows = {}
+    for i, (col, tag) in enumerate(cols):
+        ry = y + head + 15 + i * row
+        rows[col] = ry - 4
+        d.text(x + 12, ry, col, 12, 600 if tag else 400, INK)
+        if tag:
+            d.text(x + w - 10, ry, tag, 10.5, 700, ACC if tag.startswith("PK") else WARM, "end")
+    d.boxes[name] = (x, y, w, h)
+    return rows
+
+
+def link(d, x1, y1, x2, y2):
+    d.parts.append(f'<path d="M{x1},{y1} C{(x1 + x2) / 2},{y1} {(x1 + x2) / 2},{y2} {x2},{y2}" style="fill:none;stroke:{MUTE};stroke-width:1.4"/>')
+    d.parts.append(f'<circle cx="{x2}" cy="{y2}" r="3.5" style="fill:{MUTE}"/>')
+
+
+d = D(1000, 760, "Fact constellation: FactInspection and FactFacilityAnnualInspectionPerformance share DimFacility")
+dd = er_table(d, 20, 20, 230, "DimDate", [("date_key", "PK"), ("full_date", ""), ("day, day_name", ""), ("month, month_name", ""), ("quarter, year", ""), ("is_weekend, season", "")], "dim")
+df = er_table(d, 20, 245, 230, "DimFacility", [("facility_key", "PK"), ("facility_nk", "natural key"), ("license_number, dba_name", ""), ("facility_type, facility_group", ""), ("risk_category, risk_group", ""), ("facility_id_source", ""), ("last_inspection_date", "")], "dim")
+dt = er_table(d, 20, 520, 230, "DimInspectionType", [("inspection_type_key", "PK"), ("inspection_type", ""), ("inspection_type_group", "")], "dim")
+dr = er_table(d, 750, 40, 230, "DimResult", [("result_key", "PK"), ("result", ""), ("result_group", ""), ("failure_flag", "")], "dim")
+dl = er_table(d, 750, 250, 230, "DimLocation", [("location_key", "PK"), ("zip, city", ""), ("latitude_band", ""), ("longitude_band", ""), ("geographic_area_group", "")], "dim")
+fi = er_table(d, 370, 40, 270, "FactInspection", [("inspection_key", "PK"), ("inspection_id", "degenerate"), ("date_key", "FK"), ("facility_key", "FK"),
+              ("inspection_type_key", "FK"), ("result_key", "FK"), ("location_key", "FK"), ("inspection_count", ""), ("violation_count", ""),
+              ("fail_count, pass_count", ""), ("conditional_pass_count", ""), ("high_violation_flag", ""), ("batch_id, loaded_at", "")], "fact")
+fa = er_table(d, 350, 455, 310, "FactFacilityAnnualInspectionPerformance", [("facility_key", "PK, FK"), ("reporting_year", "PK"), ("inspection_count", ""),
+              ("fail_count, pass_count", ""), ("conditional_pass_count", ""), ("violation_count", ""), ("average_violations", ""), ("failure_rate", ""), ("batch_id, loaded_at", "")], "fact")
+link(d, 370, fi["date_key"], 250, dd["date_key"])
+link(d, 370, fi["facility_key"], 250, df["facility_key"])
+link(d, 370, fi["inspection_type_key"], 250, dt["inspection_type_key"])
+link(d, 640, fi["result_key"], 750, dr["result_key"])
+link(d, 640, fi["location_key"], 750, dl["location_key"])
+link(d, 350, fa["facility_key"], 250, df["facility_key"] + 6)
+d.text(500, 750, "PK = primary key · FK = foreign key (points to a dimension) · blue = dimension tables · orange = fact tables · every dimension also has a row 0 = Unknown", 11.5, 400, MUTE, "middle")
+d.save("schema_er")

@@ -9,7 +9,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"; T="$ROOT/runtime/tools"; L="$ROOT/runt
 
 # 1. ClickHouse
 if ! curl -sf http://127.0.0.1:8123/ping >/dev/null; then
-  ( cd "$ROOT/runtime"; exec nohup "$T/clickhouse/usr/bin/clickhouse" server -- --path="$ROOT/runtime/ch-data/" --tcp_port=9000 --http_port=8123 --listen_host=127.0.0.1 \
+  ( cd "$ROOT/runtime"; exec setsid nohup "$T/clickhouse/usr/bin/clickhouse" server -- --path="$ROOT/runtime/ch-data/" --tcp_port=9000 --http_port=8123 --listen_host=127.0.0.1 \
       --logger.log="$L/clickhouse.log" --logger.errorlog="$L/clickhouse.err.log" ) > "$L/clickhouse.stdout" 2>&1 &
   until curl -sf http://127.0.0.1:8123/ping >/dev/null; do sleep 1; done
 fi
@@ -23,13 +23,13 @@ if [ ! -f "$CFG" ]; then
   "$K/bin/kafka-storage.sh" format -t "$("$K/bin/kafka-storage.sh" random-uuid | tail -1)" -c "$CFG" >/dev/null
 fi
 if ! "$K/bin/kafka-topics.sh" --bootstrap-server localhost:9092 --list >/dev/null 2>&1; then
-  ( export KAFKA_HEAP_OPTS="-Xmx768m -Xms256m"; exec nohup "$K/bin/kafka-server-start.sh" "$CFG" ) > "$L/kafka.stdout" 2>&1 &
+  ( export KAFKA_HEAP_OPTS="-Xmx768m -Xms256m"; exec setsid nohup "$K/bin/kafka-server-start.sh" "$CFG" ) > "$L/kafka.stdout" 2>&1 &
   until "$K/bin/kafka-topics.sh" --bootstrap-server localhost:9092 --list >/dev/null 2>&1; do sleep 2; done
 fi
 "$K/bin/kafka-topics.sh" --bootstrap-server localhost:9092 --create --if-not-exists --topic food_inspections --partitions 3 --replication-factor 1 2>&1 | { grep -v -E "Picked up|WARNING" || true; }
 
 # 3. Spark Structured Streaming (reads only NEW events: startingOffsets=latest)
-( cd "$ROOT"; exec nohup "$ROOT/runtime/venv-spark/bin/python" streaming/spark_stream.py --fresh --starting-offsets latest ) > "$L/spark.log" 2>&1 &
+( cd "$ROOT"; exec setsid nohup "$ROOT/runtime/venv-spark/bin/python" streaming/spark_stream.py --fresh --starting-offsets latest ) > "$L/spark.log" 2>&1 &
 until grep -q "Streaming queries started" "$L/spark.log" 2>/dev/null; do sleep 2; done
 
 # 4. Grafana

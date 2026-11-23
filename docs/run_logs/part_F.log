@@ -1,0 +1,93 @@
+
+=== PART F: OLAP and the dashboard ===
+Runs roll-up, drill-down, slice, dice, pivot, CUBE (sql/07_olap_queries.sql) and builds the dashboard page.
+
+$ python etl/run_olap.py
+written docs/olap_operations.md with 9 operations
+
+$ psql -h localhost -U foodsafety -d foodsafety -P pager=off -f sql/demo_queries.sql 2>&1 | head -80
+                 table_name                  
+---------------------------------------------
+ dim_date
+ dim_facility
+ dim_inspection_type
+ dim_location
+ dim_result
+ fact_facility_annual_inspection_performance
+ fact_inspection
+(7 rows)
+
+ inspection_id | date_key | facility_key | inspection_type_key | result_key | location_key | violation_count | fail_count 
+---------------+----------+--------------+---------------------+------------+--------------+-----------------+------------
+       2535216 | 20220215 |         4927 |                   2 |          2 |           57 |               2 |          0
+       2546079 | 20220104 |         6722 |                   4 |          3 |           79 |               3 |          0
+       2546080 | 20220104 |         9341 |                   7 |          3 |           77 |               1 |          0
+       2546081 | 20220104 |         7970 |                   2 |          2 |           34 |               1 |          0
+       2546082 | 20220104 |         3026 |                   7 |          1 |           60 |               5 |          1
+(5 rows)
+
+ result_key |       result       |   result_group   | failure_flag 
+------------+--------------------+------------------+--------------
+          0 | Unknown            | Not Completed    |            0
+          1 | Fail               | Fail             |            1
+          2 | Pass               | Pass             |            0
+          3 | Pass w/ Conditions | Conditional Pass |            0
+(4 rows)
+
+ batch_id |           batch_label            | rows_staged | rows_not_completed | rows_loaded_fact | new_facilities 
+----------+----------------------------------+-------------+--------------------+------------------+----------------
+        1 | initial load Jan 2022 - Nov 2025 |       72130 |              11522 |            60608 |          16901
+        2 | incremental load Dec 2025        |        1471 |                342 |             1129 |            182
+(2 rows)
+
+        facility_group         | inspections | fail_rate_pct 
+-------------------------------+-------------+---------------
+ Restaurant & Food Service     |       43080 |          22.9
+ Schools & Childcare           |        8609 |          23.6
+ Retail Food & Grocery         |        7132 |          24.9
+ Mobile, Catering & Events     |        1510 |          16.5
+ Healthcare & Residential Care |        1303 |          22.9
+ Unknown                       |          87 |          25.3
+ Other                         |          16 |          31.3
+(7 rows)
+
+ year | quarter | inspections | fail_rate_pct 
+------+---------+-------------+---------------
+ 2025 | Q1      |        4269 |          21.4
+ 2025 | Q2      |        4246 |          20.5
+ 2025 | Q3      |        3890 |          22.2
+ 2025 | Q4      |        3647 |          20.4
+ 2025 | ALL     |       16052 |          21.1
+ ALL  | ALL     |       16052 |          21.1
+(6 rows)
+
+ inspection_type_group | inspections | fail_rate_pct 
+-----------------------+-------------+---------------
+ Routine (Canvass)     |        7355 |          22.9
+ Re-inspection         |        2892 |          10.5
+ Complaint / Illness   |        1575 |          31.4
+ License               |        1315 |          21.6
+ Other                 |          33 |           9.1
+(5 rows)
+
+ year | pass  | conditional | fail 
+------+-------+-------------+------
+ 2022 |  8225 |        2503 | 3553
+ 2023 |  9223 |        2354 | 3835
+ 2024 |  9906 |        2605 | 3481
+ 2025 | 10380 |        2281 | 3391
+(4 rows)
+
+ inspection_date |     inspection_type     |   result_group   | violation_count | prior_inspection_result | prior_violation_count | days_since_prior_inspection 
+-----------------+-------------------------+------------------+-----------------+-------------------------+-----------------------+-----------------------------
+ 2022-05-20      | License                 | Pass             |               3 | None                    |                       |                            
+ 2022-09-15      | Complaint               | Fail             |               9 | Pass                    |                     3 |                         118
+ 2022-09-29      | Canvass Re-Inspection   | Pass             |               2 | Fail                    |                     9 |                          14
+ 2023-02-10      | Complaint               | Fail             |              12 | Pass                    |                     2 |                         134
+ 2023-02-16      | Complaint Re-Inspection | Fail             |               8 | Fail                    |                    12 |                           6
+ 2023-02-21      | Complaint Re-Inspection | Conditional Pass |               6 | Fail                    |                     8 |                           5
+
+$ python dashboard/build_dashboard.py
+written dashboard/food_safety_dashboard.html 6.6 MB
+
+Open dashboard/food_safety_dashboard.html (double-click) to see it.

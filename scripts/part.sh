@@ -3,6 +3,8 @@
 # so you can type the same commands yourself.
 #
 #   bash scripts/part.sh status         are the servers running?
+#   bash scripts/part.sh all            every part in order (A B C F mart G H I), output saved to docs/run_logs/   ~9 min
+#   bash scripts/part.sh full           the same plus D (Citus) and E (real-time)                               ~16 min
 #   bash scripts/part.sh A              Part A  clean the data + EDA            (notebooks 01, 02)        ~1 min
 #   bash scripts/part.sh B              Part B  build the star schema and load it (+ compare designs)    ~1 min
 #   bash scripts/part.sh C              Part C  the 5 checks, the 10 business questions, indexes         ~15 s
@@ -46,6 +48,15 @@ sync() {   # copy the project from Windows into the Linux disk (fast to run ther
 need() { pg_isready -h localhost -p 5432 -q || { echo "PostgreSQL is not running. Double-click Start_Project.cmd first."; exit 1; }; }
 
 case "${1:-}" in
+  all|full)   # every part in order; each part's real output is also saved to docs/run_logs/part_<X>.log
+    parts="A B C F mart G H I"; [ "$1" = full ] && parts="$parts D E"
+    mkdir -p "$SRC/docs/run_logs"
+    for p in $parts; do
+      "$0" "$p" 2>&1 | tee >(sed 's/\x1b\[[0-9;]*m//g' > "$SRC/docs/run_logs/part_$p.log")
+      sleep 1
+    done
+    echo; echo "All parts done. The output of each part is saved in docs/run_logs/" ;;
+
   status)
     title "Are the servers running?" "Every line should say OK. If not, double-click Start_Project.cmd."
     for s in "PostgreSQL warehouse:5432" "Citus coordinator:5440" "Citus worker 1:5441" "Citus worker 2:5442"; do

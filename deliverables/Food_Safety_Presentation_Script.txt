@@ -6,7 +6,7 @@ Rushikesh controls the laptop for the whole talk. Lines in [square brackets] are
 
 
 ========================================================================
-1. ARYAN - INTRODUCTION  (0:00 - 1:30, slides 1-3)
+1. ARYAN - INTRODUCTION  (0:00 - 1:30, slides 1-4)
 ========================================================================
 
 Good morning, ma'am. We are Aryan, Omkar, Vishwaraj and Rushikesh, and our project is Food Safety and Restaurant Inspection Analytics.
@@ -17,7 +17,7 @@ We took four years, 2022 to 2025. That is 73,630 records.
 
 Our question is simple: which places fail inspections, where, when, and can we predict it? The brief also gave us ten business questions, for example which inspection types fail most, and what happens after a failed inspection.
 
-[slide 3 - the project picture]
+[slide 4 - the project picture; slide 3 lists the tools]
 
 This picture is the whole project. First we clean the data in Python. Then we load it into a data warehouse in PostgreSQL, designed as a star schema. On that warehouse we answer the ten questions with SQL, show them on a dashboard, and train three models. Finally, as the brief asks, we store the same data in two more kinds of warehouse - a distributed one and a real-time one - and compare all three.
 
@@ -25,7 +25,7 @@ Omkar will now explain the data and the warehouse.
 
 
 ========================================================================
-2. OMKAR - DATA, CLEANING AND THE WAREHOUSE  (1:30 - 4:30, slides 4-6)
+2. OMKAR - DATA, CLEANING AND THE WAREHOUSE  (1:30 - 4:30, slides 5-9)
 ========================================================================
 
 Thank you, Aryan.
@@ -62,7 +62,7 @@ Vishwaraj will now show our three models.
 
 
 ========================================================================
-3. VISHWARAJ - THE THREE MODELS  (4:30 - 6:30, slides 7-8)
+3. VISHWARAJ - THE THREE MODELS  (4:30 - 6:30, slides 10-12)
 ========================================================================
 
 Thank you, Omkar.
@@ -90,7 +90,7 @@ Rushikesh will now show the other two warehouses and the live demo.
 
 
 ========================================================================
-4. RUSHIKESH - DISTRIBUTED, REAL-TIME, DASHBOARD AND CONCLUSION  (6:30 - 10:00, slides 9-10)
+4. RUSHIKESH - DISTRIBUTED, REAL-TIME, DASHBOARD AND CONCLUSION  (6:30 - 10:00, slides 13-17)
 ========================================================================
 
 Thank you, Vishwaraj.
@@ -115,7 +115,7 @@ You can see the inspections, fails and passes going up right now. We also sent 2
 
 For a business user, we built this dashboard: one HTML page that opens with a double-click. It has the four sections the brief asks for, plus a page for the models and one for the three warehouses. Every chart reads from our warehouse, so the numbers match the report.
 
-[slide 10]
+[slide 15]
 
 To compare the three warehouses: the batch warehouse is the simplest and the best for history and reports. The distributed one gives the same answers and grows with the data. The real-time one is the only one that shows things live, but it needs four services.
 

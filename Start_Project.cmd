@@ -6,11 +6,6 @@ rem First time on a new machine instead run:  wsl -d Ubuntu -u root -- bash scri
 cd /d "%~dp0"
 echo Starting everything. This takes about 3 minutes. JupyterLab and Grafana are ready after about 1 minute.
 echo.
-wsl -d Ubuntu -u root --cd "%~dp0" -- bash scripts/run_everything_wsl.sh start
-echo.
-echo ==========================================================================
-echo  Everything is running. KEEP THIS WINDOW OPEN.
-echo  Closing this window (or pressing Ctrl+C) stops all the servers.
-echo ==========================================================================
-rem Windows shuts the Linux side down when no WSL command is running; this keeps it alive until the window is closed.
-wsl -d Ubuntu -u root -- bash -c "while true; do sleep 3600; done"
+rem Start everything, then stay in the SAME Linux session: Windows stops what a session started when the session ends,
+rem so this window keeps the servers alive until it is closed.
+wsl -d Ubuntu -u root --cd "%~dp0" -- bash -c "bash scripts/run_everything_wsl.sh start; echo; echo ==========================================================================; echo ' Everything is running. KEEP THIS WINDOW OPEN.'; echo ' Closing this window stops all the servers.'; echo ==========================================================================; while true; do sleep 3600; done"

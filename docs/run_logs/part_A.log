@@ -1,0 +1,85 @@
+
+=== PART A: clean the data and explore it ===
+Reads the raw Chicago file, applies the cleaning rules in etl/curation.py,
+writes data/curated/inspections_curated.csv, then draws the EDA charts.
+
+$ ls -lh data/raw/
+total 92M
+-rwxrwxrwx 1 root root 75M Nov 20 03:23 food_inspections_2022_2025.csv
+-rwxrwxrwx 1 root root 17M Nov 20 03:23 food_inspections_2022_2025.csv.gz
+-rwxrwxrwx 1 root root 40K Nov 20 03:23 socrata_metadata.json
+
+$ python -c "import pandas as pd; d=pd.read_csv('data/raw/food_inspections_2022_2025.csv'); print('raw rows:', len(d), '| columns:', len(d.columns)); print(d.columns.tolist())"
+raw rows: 73630 | columns: 17
+['inspection_id', 'dba_name', 'aka_name', 'license_', 'facility_type', 'risk', 'address', 'city', 'state', 'zip', 'inspection_date', 'inspection_type', 'results', 'violations', 'latitude', 'longitude', 'location']
+
+$ jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=1800 notebooks/01_data_curation.ipynb 2>&1 | grep -v -i -E 'warning|kernel|nbconvert' || true
+  _validate(nbdict, ref, version, version_minor, relax_add_props)
+
+Rows: 73,630 | Columns: 17
+SHA-256 of the downloaded file: bd53e58163e177deae25ce1c0fa8f625a23bc787629eeb1e38743deea762deca
+Date range: 2022-01-03 to 2025-12-31
+
+Columns used: ['inspection_id', 'dba_name', 'aka_name', 'license_', 'facility_type', 'risk', 'address', 'city', 'state', 'zip', 'inspection_date', 'inspection_type', 'results', 'violations', 'latitude', 'longitude', 'location']
+Missing values per column:
+Result values:
+results
+Pass                    37749
+Fail                    14261
+Pass w/ Conditions       9744
+Out of Business          5304
+No Entry                 4991
+Not Ready                1562
+Business Not Located       19
+
+Risk values:
+risk
+Risk 1 (High)      59175
+Risk 2 (Medium)    10878
+Risk 3 (Low)        3522
+All                   38
+NaN                   17
+
+State values:
+state
+IL     73592
+NaN       25
+IN         8
+CA         3
+CO         1
+WI         1
+
+City spellings:
+city
+CHICAGO     73317
+Chicago       117
+NaN            52
+chicago        48
+CCHICAGO       13
+EVANSTON       11
+
+Distinct raw facility types: 217
+Distinct inspection types : 15
+
+   ... (more in the notebook)
+$ jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=1800 notebooks/02_eda.ipynb 2>&1 | grep -v -i -E 'warning|kernel|nbconvert' || true
+  _validate(nbdict, ref, version, version_minor, relax_add_props)
+
+Curated rows: 73,601 | Completed inspections: 61,737
+--- result_group
+--- risk_group
+--- facility_group
+--- inspection_type_group
+Top 10 raw-derived facility types:
+Rare facility types (< 0.1% of rows): 184 of 203 categories, together 1336 rows (1.74%)
+Counts behind the first heat map:
+Busiest months : {Period('2024-10', 'M'): 1641, Period('2025-04', 'M'): 1624, Period('2024-04', 'M'): 1611}
+Quietest months: {Period('2022-02', 'M'): 917, Period('2022-01', 'M'): 941, Period('2023-07', 'M'): 1003}
+Hourly / time-band pattern: NOT AVAILABLE (every timestamp is 00:00:00 in the source).
+Coordinates available for 99.62% of completed inspections; none lie outside the Chicago bounding box (validated in curation).
+Top 8 ZIP codes by NUMBER of inspections:
+Top 8 ZIP codes by FAIL RATE (at least 200 inspections):
+$ python -c "import pandas as pd; d=pd.read_csv('data/curated/inspections_curated.csv', dtype={'zip': str}); print('curated rows:', len(d), '| completed inspections:', int(d.is_completed.sum()), '| new columns:', len(d.columns))"
+curated rows: 73601 | completed inspections: 61737 | new columns: 39
+
+Charts: open notebooks/02_eda.ipynb in JupyterLab (http://localhost:8888). Cleaning log: docs/data_quality_report.md
