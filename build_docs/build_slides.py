@@ -41,7 +41,7 @@ def two(left, right, ratio="1fr 1.25fr"):
 
 
 S = []
-S.append(f'''<section class="slide title"><div class="tband"><div class="kicker">Data Analytics (MDM) · Department of Computer Engineering · 2026-27</div>
+S.append(f'''<section class="slide title"><div class="tband"><div class="kicker">Exploratory Data Analytics (PEC) · Department of Computer Engineering · 2026-27</div>
 <h1>Food Safety &amp; Restaurant<br>Inspection Analytics</h1><p class="sub">What four years of Chicago food inspections tell us</p></div>
 <div class="team"><div><b>Aryan Tandale</b><span>202502040013</span></div><div><b>Omkar Patil</b><span>202502040010</span></div>
 <div><b>Vishwaraj Savairam</b><span>202502040035</span></div><div><b>Rushikesh Maddewad</b><span>202502040037</span></div></div>

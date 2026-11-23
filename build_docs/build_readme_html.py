@@ -100,7 +100,7 @@ PAGES = [  # (markdown, title, top line, full page, page for sharing)
     ("docs/presentation/TEAM_SCRIPT.md", "Food Safety Team Script", "Team script · 10-minute presentation", "docs/presentation/Team_Script.html", "deliverables/Team_Script.html"),
 ]
 for src, title, top, full_out, share_out in PAGES:
-    content = f'<main><div class="top">{top} · Data Analytics (MDM) · Department of Computer Engineering</div>{to_html(ROOT / src)}</main>'
+    content = f'<main><div class="top">{top} · Exploratory Data Analytics (PEC) · Department of Computer Engineering</div>{to_html(ROOT / src)}</main>'
     full = ('<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>{title}</title>{FONTS}<style>{STYLE}</style></head><body>{content}</body></html>\n')
     (ROOT / full_out).write_text(full, encoding="utf-8")
