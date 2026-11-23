@@ -1,0 +1,498 @@
+FOOD SAFETY & RESTAURANT INSPECTION ANALYTICS
+DEMO PREPARATION GUIDE  (for Rushikesh)
+
+How to use this:
+  1. Run the project once with PART 1.
+  2. Read PART 2 one section at a time. Each section has:
+       TECHNICAL      - the proper words (what to say to ma'am)
+       SIMPLE WORDS   - what it really means
+       OPEN / SEE     - the link or file to open, and exactly what you should see there
+  3. Write every doubt in PART 3 as you go.
+  4. Practise with the questions in PART 4.
+
+
+########################################################################
+PART 1 - HOW TO RUN THE PROJECT
+########################################################################
+
+The project runs inside Ubuntu on Windows (WSL). You never type Linux commands
+unless you want to: three double-click files do everything.
+
+STEP 1 - Start everything  (3 minutes, do this 30 minutes before class)
+  - Open the project folder in File Explorer.
+  - Double-click  Start_Project.cmd
+  - A black window opens. Wait until it prints "Everything is running".
+  - DO NOT close this window. Closing it stops the servers.
+
+STEP 2 - Check everything is up  (10 seconds)
+  - Double-click  Project_Menu.cmd
+  - Type 0 and press Enter.
+  - Every line must say OK:
+        OK   PostgreSQL warehouse (port 5432)
+        OK   Citus coordinator (port 5440)
+        OK   Citus worker 1 (port 5441)
+        OK   Citus worker 2 (port 5442)
+        OK   ClickHouse (port 8123)
+        OK   Grafana (port 3000)
+        OK   JupyterLab (port 8888)
+        OK   Kafka (port 9092)
+  - If a line says "--", run Start_Project.cmd again.
+
+STEP 3 - Open these and keep them open as tabs, in this order
+  1. Slides ............ deliverables\Food_Safety_Presentation.pptx
+  2. JupyterLab ........ http://localhost:8888/lab/tree/notebooks
+  3. pgAdmin ........... server localhost, port 5432, database foodsafety,
+                         user foodsafety, password foodsafety
+                         then File > Open > sql\demo_queries.sql
+  4. pgAdmin (Citus) ... server localhost, port 5440, database foodsafety_citus,
+                         user postgres, no password
+  5. Grafana ........... http://localhost:3000/d/food-safety-rt
+  6. Dashboard ......... double-click dashboard\food_safety_dashboard.html
+  7. ClickHouse ........ http://localhost:8123/play   (only if asked)
+
+  First time in pgAdmin: right-click "Servers" > Register > Server, fill the
+  details above, and tick "Save password".
+
+STEP 4 - Run any single part (when ma'am says "run it")
+  Double-click Project_Menu.cmd and type a number:
+     1  Part A  clean the data + charts            (30 sec)
+     2  Part B  build the warehouse and load it    (35 sec)
+     3  Part C  the 5 checks + 10 questions        (10 sec)
+     4  Part F  OLAP queries + rebuild dashboard   (5 sec)
+     5  the table the models read                  (3 sec)
+     6  Part G  regression                         (3.5 min)
+     7  Part H  association rules                  (30 sec)
+     8  Part I  decision tree                      (2.5 min)
+     9  Part D  Citus test                         (3-5 min)
+    10  Part E  real-time replay                   (4 min)
+    11  show the data files      12  show the warehouse tables
+    13  show the Citus cluster   14  show the real-time data
+  Each one prints every command it runs in green, so you can see how it works.
+
+STEP 5 - The live real-time demo
+  Open Grafana first, then double-click  Replay_Stream.cmd
+  The numbers in Grafana rise for about 2.5 minutes.
+  In the presentation, start it at 5:30 (while Vishwaraj speaks) so the
+  numbers are moving when you reach Grafana at 7:15.
+
+STEP 6 - Run the WHOLE batch project in one go (only if asked; 10 minutes)
+  In a Linux terminal:   python run_all.py
+  Better: show docs\console_logs\run_all.log instead of waiting 10 minutes.
+
+STEP 7 - After the presentation
+  Close the Start_Project.cmd window. Everything stops.
+
+
+########################################################################
+PART 2 - EVERY SECTION EXPLAINED
+########################################################################
+
+------------------------------------------------------------------------
+SECTION 0 - THE WHOLE PROJECT
+------------------------------------------------------------------------
+TECHNICAL
+  An end-to-end analytics pipeline: data curation, a dimensional data
+  warehouse in PostgreSQL, OLAP and BI, three data-mining models, and two
+  alternative warehouse architectures (distributed with Citus, real-time
+  with Kafka, Spark Structured Streaming, ClickHouse and Grafana), compared
+  by measurement.
+
+SIMPLE WORDS
+  Chicago publishes every food inspection. We took 4 years (73,630 rows).
+  We cleaned them, stored them in a database designed for questions,
+  answered the city's 10 questions, trained 3 simple prediction/pattern
+  models, and stored the same data in two more ways to compare.
+
+OPEN / SEE
+  Slide 3, or README.html > "The project in one picture".
+  See: a left-to-right picture. Raw CSV -> Clean -> Staging -> Batch
+  warehouse (blue). From the warehouse: SQL & OLAP, Dashboard, 3 models.
+  Dashed lines: the Citus copy and the real-time copy.
+
+------------------------------------------------------------------------
+SECTION A - THE DATA AND CLEANING  (Omkar presents)
+------------------------------------------------------------------------
+TECHNICAL
+  Data profiling (missing values, value distributions, duplicates, invalid
+  codes), rule-based curation with a logged decision per rule, derived
+  attributes, row reconciliation, and exploratory data analysis (numerical,
+  categorical, temporal, geographic, outcome).
+
+SIMPLE WORDS
+  Before using the data we checked every column for problems. We found:
+    - visits that never happened ("Out of Business", "No Entry")
+    - a wrong risk value "All"
+    - "Chicago" spelled 5 different ways
+    - 217 hand-typed facility types
+    - violations stored as one long sentence
+  We fixed each problem with a written rule and counted how many rows it
+  touched. We removed only 29 duplicate reports. We grouped the 217 types
+  into 7 groups. We counted the violations inside the text. Visits that
+  never happened are kept but not counted.
+  Result: 73,630 rows -> 61,737 real inspections.
+  Then we drew charts (EDA) to understand the data.
+
+OPEN / SEE
+  http://localhost:8888/lab/tree/notebooks/01_data_curation.ipynb
+    - Grey boxes "In plain words" explain each step.
+    - Profiling output: Pass 37,749, Fail 14,261, Out of Business 5,304,
+      risk "All" 38, city spellings, "Distinct raw facility types: 217".
+    - Scroll to the cleaning-log TABLE: each problem, its row count, what we
+      did, why. THIS is what you show when asked "how did you clean it".
+    - Last cell: "Saved 73,601 curated rows".
+  http://localhost:8888/lab/tree/notebooks/02_eda.ipynb
+    - Histograms (most inspections have 0-5 violations).
+    - "C. Temporal analysis": inspections per year rise slowly; weekends
+      empty; fail rate per month 20-25%.
+  Menu 11 shows the raw and clean files.
+
+------------------------------------------------------------------------
+SECTION B - THE WAREHOUSE DESIGN (STAR SCHEMA)  (Omkar presents)
+------------------------------------------------------------------------
+TECHNICAL
+  Dimensional model with grain = one completed inspection per facility per
+  date. Fact table fact_inspection with additive measures and foreign keys
+  to five dimensions (date, facility, inspection type, result, location),
+  surrogate keys, an Unknown member (key 0) in every dimension, Type-1
+  facility dimension. A second fact (facility x year) makes it a fact
+  constellation. Compared against a snowflake schema by measurement.
+
+SIMPLE WORDS
+  A warehouse is a database built for answering questions.
+  The middle table (fact table) has one row per inspection and holds only
+  numbers: which date, which place, which result (as ID numbers), how many
+  violations, did it fail (1/0).
+  The words (restaurant name, type, ZIP, etc.) are stored once, in five
+  side tables (dimensions). Joining the middle table with a side table
+  answers a question. That shape is a "star".
+  We also tried a "snowflake" (side tables split further): it needed 9
+  joins instead of 3 and was twice as slow, so we kept the star.
+  We added a second middle table, one row per place per year, which makes
+  yearly questions 7 times faster. Two middle tables = "fact constellation".
+
+OPEN / SEE
+  pgAdmin > Warehouse > foodsafety > Schemas > dw > Tables
+    - 7 tables: dim_date, dim_facility, dim_inspection_type, dim_location,
+      dim_result, fact_inspection, fact_facility_annual_inspection_performance.
+  Right-click "dw" > ERD For Schema  -> pgAdmin draws the star.
+  demo_queries.sql, select D2, press F5:
+    - fact rows: only numbers (date_key 20220104, facility_key 6722 ...).
+  D3: dim_result, notice row 0 = Unknown.
+
+------------------------------------------------------------------------
+SECTION C - LOADING AND CHECKING (ETL)  (Omkar presents)
+------------------------------------------------------------------------
+TECHNICAL
+  ETL: bulk COPY into a staging table per batch, then a PL/pgSQL procedure
+  (dw.load_batch) applies data-quality rules, inserts new dimension members,
+  looks up surrogate keys and loads facts in one transaction. Initial load
+  (Jan 2022 - Nov 2025) and incremental load (Dec 2025). Five validation
+  queries after each load. B-tree indexes on the fact foreign keys.
+
+SIMPLE WORDS
+  ETL = Extract (read the file), Transform (clean it, find the ID numbers),
+  Load (put it in the warehouse).
+  The clean file first goes into a "waiting room" table (staging). Then one
+  SQL program adds any new restaurants to the side tables and puts each
+  inspection into the middle table.
+  We loaded 2022 to November 2025 first (60,608 inspections), then only
+  December 2025 (1,129 more). That second one is the "incremental load":
+  only new data is added, nothing is rebuilt.
+  After each load, 5 check queries count problems. All 5 say 0.
+  Indexes made a lookup 10 times faster (6.5 ms -> 0.5 ms).
+
+OPEN / SEE
+  demo_queries.sql D4 (load audit):
+    batch 1: staged 72,130 / not completed 11,522 / loaded 60,608
+    batch 2: staged 1,471 / not completed 342 / loaded 1,129
+  Open sql\04_validation.sql, press F5: five rows, every value 0.
+  Menu 2 re-runs the load and prints "5 checks, failures = 0" twice.
+
+------------------------------------------------------------------------
+SECTION F - BUSINESS QUESTIONS, OLAP, DASHBOARD  (Omkar presents, you show)
+------------------------------------------------------------------------
+TECHNICAL
+  The ten analytical questions as SQL on the star schema; OLAP operations:
+  roll-up (GROUP BY ROLLUP), drill-down, slice, dice, pivot (FILTER), CUBE,
+  GROUPING SETS; a six-page Plotly HTML dashboard built from the warehouse.
+
+SIMPLE WORDS
+  OLAP = looking at the same numbers at different levels.
+    Roll-up   = go up a level   (months -> quarter -> year)
+    Drill-down= go down a level (facility group -> type -> one shop)
+    Slice     = keep one value  (only 2025)
+    Dice      = keep several    (2025 AND high risk)
+    Pivot     = turn rows into columns (Pass / Conditional / Fail side by side)
+  Findings:
+    - fail rate 23.1%, falling from 24.9% (2022) to 21.1% (2025)
+    - restaurants get about 7 of every 10 inspections
+    - complaint inspections fail most: 37.6%
+    - after a fail, 79% of next visits pass (about 13 days later)
+
+OPEN / SEE
+  demo_queries.sql:
+    D6 - fail rate by facility group (restaurants 43,080 inspections)
+    D7 - roll-up: rows Q1..Q4, then a row with quarter = ALL (the total)
+    D8 - slice & dice: 2025 + high risk, by inspection type
+    D9 - pivot: one row per year, columns pass / conditional / fail
+  Dashboard (double-click dashboard\food_safety_dashboard.html):
+    Overview page: 61,737 inspections, 23.1% fail rate, yearly chart, donut.
+    Left menu: Facilities & risk, Locations, Inspections, Data mining,
+    Warehouses.
+
+------------------------------------------------------------------------
+SECTION M - THE TABLE THE MODELS READ (ANALYTICS MART)  (Vishwaraj)
+------------------------------------------------------------------------
+TECHNICAL
+  A denormalised analytical mart built from the warehouse with window
+  functions (LAG over each facility ordered by date) to add prior-inspection
+  features without leakage.
+
+SIMPLE WORDS
+  One flat table made from the warehouse. Each inspection also "remembers"
+  the previous inspection of the same restaurant: its result, its
+  violations, and how many days ago it was. The models learn from this.
+  Models read the warehouse, not the raw file (the brief requires this).
+
+OPEN / SEE
+  demo_queries.sql D10: one restaurant's history. Row 2 (a Fail) shows
+  previous result Pass, 3 violations, 118 days earlier.
+
+------------------------------------------------------------------------
+SECTION G - REGRESSION  (Vishwaraj)
+------------------------------------------------------------------------
+TECHNICAL
+  Simple and multiple linear regression predicting ViolationCount from
+  pre-inspection features; one-hot encoding; temporal train/test split
+  (2022-24 / 2025); evaluated with MAE, MSE, RMSE, R-squared; diagnostics:
+  VIF, Breusch-Pagan, outlier influence.
+
+SIMPLE WORDS
+  Regression predicts a NUMBER: how many violations will this inspection
+  find? We learn from 2022-2024 and test on 2025 (so no peeking at the
+  future).
+  Our model is wrong by 2.45 violations on average. Just guessing the
+  average would be wrong by 2.71. So it helps, but only a little.
+  R-squared 0.12 means it explains 12% of the differences. Low, because
+  the real causes (how clean the kitchen is) are not in the data.
+
+OPEN / SEE
+  http://localhost:8888/lab/tree/notebooks/07_regression.ipynb
+    - "Train: 45266 | Test: 15919"
+    - simple equation: violations = 2.737 + 0.209 x previous violations
+    - results table: Baseline MAE 2.71, Simple 2.50, Multiple 2.45, R2 0.12
+    - scatter chart: actual vs predicted
+
+------------------------------------------------------------------------
+SECTION H - ASSOCIATION RULES  (Vishwaraj)
+------------------------------------------------------------------------
+TECHNICAL
+  Market-basket analysis: each inspection is a transaction of 7 categorical
+  items; frequent itemsets with Apriori and FP-Growth (min support 0.02);
+  rules filtered by confidence >= 0.30 and lift >= 1.3, removing
+  definitional and redundant rules.
+
+SIMPLE WORDS
+  Finds things that happen TOGETHER, like a shopping basket.
+  Each inspection = a basket of 7 items (type, risk, result, violations...).
+    Support    = how often the items appear together
+    Confidence = when the IF part happens, how often the THEN part happens
+    Lift       = how many times more than normal (above 1 = real link)
+  Best rule: IF 10+ violations THEN Fail - 69% of the time, lift 3
+  (three times more likely than usual).
+  Apriori and FP-Growth are two methods; both found the same 1,198 patterns.
+
+OPEN / SEE
+  http://localhost:8888/lab/tree/notebooks/08_association_mining.ipynb
+    - "Apriori: 1198 frequent itemsets"
+    - "FP-Growth: 1198 ... identical to Apriori: True"
+    - last table: the selected rules with support, confidence, lift and a
+      plain-English meaning for each.
+
+------------------------------------------------------------------------
+SECTION I - DECISION TREE  (Vishwaraj)
+------------------------------------------------------------------------
+TECHNICAL
+  CART decision-tree classifier for IsFailedInspection; train 2022-23,
+  validation 2024, test 2025; grid search over max_depth,
+  min_samples_split, min_samples_leaf, ccp_alpha (420 combinations);
+  threshold chosen on validation; accuracy, precision, recall, F1,
+  ROC-AUC, confusion matrix, feature importance, decision paths.
+
+SIMPLE WORDS
+  A tree of yes/no questions that predicts: will this inspection FAIL?
+  We tried 420 settings and picked the best on 2024 data, then tested once
+  on 2025.
+  A very deep tree memorises the training data and does badly on new data
+  (overfitting), so we limited the depth.
+  AUC 0.635 (0.5 = guessing, 1 = perfect): better than guessing, but weak.
+  Only 1 in 5 inspections fail, so with the normal 50% cut-off the tree
+  almost never says "fail" (catches 4%). With a 21.7% cut-off it catches 61%.
+  Most important clue: did the PREVIOUS inspection fail?
+
+OPEN / SEE
+  http://localhost:8888/lab/tree/notebooks/09_decision_tree.ipynb
+    - "420 combinations tried"
+    - the tree picture (top 3 levels)
+    - ROC curve and confusion matrices
+    - feature importance bar chart (prior result Fail on top)
+    - three paths: highest fail rate 55-58%, lowest 4-5%
+
+------------------------------------------------------------------------
+SECTION D - DISTRIBUTED WAREHOUSE (CITUS)  (YOU)
+------------------------------------------------------------------------
+TECHNICAL
+  Citus cluster (1 coordinator, 2 workers) on PostgreSQL 18. Fact table
+  hash-distributed on facility_key into 32 shards; dimensions as reference
+  tables (co-located joins). Distribution-key selection by cardinality and
+  skew. Centralised vs distributed comparison at 61,737 to 2,000,000 rows
+  (synthetic scale-up by resampling, for timing only).
+
+SIMPLE WORDS
+  One database spread over 3 database servers.
+  The coordinator receives the question, sends it to the 2 workers, and
+  merges their answers.
+  The big table is cut into 32 pieces (shards), 16 on each worker, split by
+  restaurant. Restaurant was chosen because it has about 17,000 different
+  values, so the pieces are even. Date or location gave uneven pieces.
+  The small side tables are copied to every worker (reference tables).
+  Result: all 25 test questions gave the SAME answer as one server.
+  Small data: Citus is slower (the coordinator has extra work).
+  From about 500,000 rows: mostly faster.
+  The big sizes are copies of real rows, used only to measure speed.
+
+OPEN / SEE
+  pgAdmin on port 5440, run the queries at the bottom of demo_queries.sql:
+    - pg_dist_node: 3 rows (5440, 5441, 5442), all active
+    - citus_tables: fact tables "distributed" on facility_key, 32 shards;
+      dims "reference"
+    - shards: worker 5441 = 16 shards (95 MB), worker 5442 = 16 (94 MB)
+  Menu 13 shows the same in a terminal.
+
+------------------------------------------------------------------------
+SECTION E - REAL-TIME WAREHOUSE  (YOU)
+------------------------------------------------------------------------
+TECHNICAL
+  Replay simulation: a Python Kafka producer emits Oct-Dec 2025 inspections
+  in date order; Spark Structured Streaming (2-second micro-batches)
+  validates each event, routes invalid events to a dead-letter table,
+  computes 10-second processing-time windows and daily event-time windows
+  with a watermark; sinks to ClickHouse (MergeTree / ReplacingMergeTree);
+  Grafana dashboard refreshing every 5 seconds.
+
+SIMPLE WORDS
+  The city's data is old, not live, so we REPLAY 3 months as if happening
+  now, and we clearly label it a simulation.
+    Producer   = a Python program that sends each inspection as a message
+    Kafka      = a queue that holds the messages
+    Spark      = reads the queue every 2 seconds, checks each message
+    ClickHouse = a very fast database that stores the good messages
+    Grafana    = the live dashboard, refreshes every 5 seconds
+  We also sent 24 broken messages on purpose. All 24 were caught and put
+  in a separate table. A message takes about 1.8 seconds to reach the
+  screen.
+
+OPEN / SEE
+  http://localhost:3000/d/food-safety-rt
+    - title says REPLAY SIMULATION
+    - top: inspections 3,647, fails 745, passes 2,402, violations,
+      high-violation inspections
+    - middle: inspections per minute, top facility types, risk donut
+    - bottom: ZIP alerts (red = fail rate 40%+), pipeline health
+      (3,647 valid, 24 rejected, delay in ms)
+  http://localhost:8123/play  type:
+      SELECT count() FROM food.inspection_events          -> 3647
+      SELECT reason, count() FROM food.invalid_events GROUP BY reason
+                                                          -> 8 + 8 + 8
+
+------------------------------------------------------------------------
+SECTION J - COMPARING THE THREE WAREHOUSES  (YOU)
+------------------------------------------------------------------------
+TECHNICAL
+  Batch: simplest, best for historical analytics, single node. Distributed:
+  horizontal scale-out, identical results, coordination overhead at small
+  scale. Real-time: lowest latency and live monitoring, highest operational
+  complexity (four services).
+
+SIMPLE WORDS
+  Batch     = one database, loaded now and then. Simple. Best for reports.
+  Citus     = same answers, spread over several machines. Useful only
+              when data is huge.
+  Real-time = shows things live in about 2 seconds, but needs 4 programs
+              running.
+  Recommendation: batch as the main system (Chicago adds only ~16,000
+  inspections a year). Add real-time only for live monitoring. Citus only
+  if data becomes too big for one server.
+
+OPEN / SEE
+  Slide 10, or dashboard > Warehouses page.
+
+
+########################################################################
+PART 3 - MY DOUBTS  (write here as you go)
+########################################################################
+
+Section: ______   Doubt: ______________________________________________
+
+Section: ______   Doubt: ______________________________________________
+
+Section: ______   Doubt: ______________________________________________
+
+Section: ______   Doubt: ______________________________________________
+
+Section: ______   Doubt: ______________________________________________
+
+Section: ______   Doubt: ______________________________________________
+
+Section: ______   Doubt: ______________________________________________
+
+Section: ______   Doubt: ______________________________________________
+
+(Paste them all to Claude together and get the answers in one go.)
+
+
+########################################################################
+PART 4 - PRACTICE QUESTIONS  (answer each out loud in 1-2 sentences)
+########################################################################
+
+Basics
+ 1. What is the project about, in two sentences?
+ 2. Where does the data come from, and how many rows?
+ 3. How do you start the project and check it is running?
+
+Data (A)
+ 4. Name three problems you found in the raw data.
+ 5. Why did 73,630 rows become 61,737 inspections?
+ 6. A Fail with no violation text: what violation count did you give it, and why?
+
+Warehouse (B, C)
+ 7. What is the grain of your fact table?
+ 8. What is the difference between a fact table and a dimension table?
+ 9. Why did you choose a star schema over a snowflake?
+10. What is a surrogate key, and what is row 0 = Unknown for?
+11. What is the difference between the initial and the incremental load?
+12. How do you prove the load is correct?
+
+OLAP (F)
+13. Explain roll-up, slice, dice and pivot with an example from our data.
+14. Give two main findings of the project.
+
+Models (G, H, I)
+15. Why did you split by time and not randomly?
+16. What do MAE 2.45 and R-squared 0.12 mean? Why is R-squared low?
+17. Explain support, confidence and lift using your best rule.
+18. What is overfitting, and how did you avoid it?
+19. Why did you change the cut-off from 0.5 to 0.217?
+
+Distributed (D)
+20. What is a shard and a reference table?
+21. Why facility_key as the distribution key?
+22. Is Citus faster? Why or why not?
+
+Real-time (E)
+23. Is your real-time data really live?
+24. What does each of Kafka, Spark, ClickHouse and Grafana do?
+25. What happens to a broken message?
+
+Comparison (J)
+26. Which warehouse do you recommend and why?

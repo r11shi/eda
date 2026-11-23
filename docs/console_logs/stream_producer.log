@@ -1,3 +1,3 @@
 $ python streaming/producer.py --from 2025-10-01 --to 2025-12-31 --rate 80 --bad-every 150
-REPLAY SIMULATION run 09a31ae4: 3,647 completed inspections 2025-10-01..2025-12-31 at 80.0/s -> topic 'food_inspections'
+REPLAY SIMULATION run 0f3ddada: 3,647 completed inspections 2025-10-01..2025-12-31 at 80.0/s -> topic 'food_inspections'
 done: 3,647 events + 24 injected malformed test events in 45.6 s (80.0 events/s)

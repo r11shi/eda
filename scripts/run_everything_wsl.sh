@@ -47,7 +47,7 @@ start_stream() {
   say "Replaying Oct-Dec 2025 inspections into Kafka (80 events/s, one malformed test event every 150)"
   mkdir -p docs/console_logs
   { echo "\$ python streaming/producer.py --from 2025-10-01 --to 2025-12-31 --rate 80 --bad-every 150"
-    python streaming/producer.py --from 2025-10-01 --to 2025-12-31 --rate 80 --bad-every 150; } | tee docs/console_logs/stream_producer.log | tail -2
+    python streaming/producer.py --from 2025-10-01 --to 2025-12-31 --rate "${START_RATE:-150}" --bad-every 150; } | tee docs/console_logs/stream_producer.log | tail -2
   sleep 20
   ch() { echo ":) $1"; curl -s http://127.0.0.1:8123/ --data-binary "$1 FORMAT PrettyCompactMonoBlock"; echo; }
   { echo "\$ clickhouse client   (ClickHouse, real-time warehouse)"
@@ -135,8 +135,8 @@ case "$MODE" in
     [ -d "$P/runtime/tools" ] || { echo "Run 'install' and 'full' first."; exit 1; }
     sync_code
     start_postgres
+    dashboards          # notebooks + Grafana first, so they can be opened while the stream starts
     start_stream
-    dashboards
     banner ;;
   dashboards)      # only copy the code again and restart Grafana + the notebook server
     sync_code

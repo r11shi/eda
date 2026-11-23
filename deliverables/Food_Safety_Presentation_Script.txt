@@ -1,0 +1,152 @@
+FOOD SAFETY & RESTAURANT INSPECTION ANALYTICS
+Presentation script - about 10 minutes
+
+Order: Aryan (introduction) -> Omkar (data and warehouse) -> Vishwaraj (models) -> Rushikesh (other two warehouses, demo, conclusion)
+Rushikesh controls the laptop for the whole talk. Lines in [square brackets] are what Rushikesh shows on screen; do not read them out.
+
+
+========================================================================
+1. ARYAN - INTRODUCTION  (0:00 - 1:30, slides 1-3)
+========================================================================
+
+Good morning, ma'am. We are Aryan, Omkar, Vishwaraj and Rushikesh, and our project is Food Safety and Restaurant Inspection Analytics.
+
+The City of Chicago inspects every place that serves food: restaurants, shops, schools, day-care centres. Every inspection ends in Pass, Pass with Conditions or Fail, and the city publishes all of them as open data.
+
+We took four years, 2022 to 2025. That is 73,630 records.
+
+Our question is simple: which places fail inspections, where, when, and can we predict it? The brief also gave us ten business questions, for example which inspection types fail most, and what happens after a failed inspection.
+
+[slide 3 - the project picture]
+
+This picture is the whole project. First we clean the data in Python. Then we load it into a data warehouse in PostgreSQL, designed as a star schema. On that warehouse we answer the ten questions with SQL, show them on a dashboard, and train three models. Finally, as the brief asks, we store the same data in two more kinds of warehouse - a distributed one and a real-time one - and compare all three.
+
+Omkar will now explain the data and the warehouse.
+
+
+========================================================================
+2. OMKAR - DATA, CLEANING AND THE WAREHOUSE  (1:30 - 4:30, slides 4-6)
+========================================================================
+
+Thank you, Aryan.
+
+Before building anything, we profiled the data: we looked at every column for missing values, duplicates and strange values.
+
+[notebook 01 - profiling output and cleaning log]
+
+We found real problems. Some rows are visits that never happened, like "Out of Business" or "No Entry". The risk column had an invalid value "All". The facility type was typed by hand, with 217 different spellings. And the violations were one long text.
+
+We fixed each problem with a written rule, and every rule records how many rows it changed. We removed 29 reports that were entered twice. We grouped the 217 facility types into 7 groups. We counted the violation numbers inside the text. And we kept the 11,864 visits that never happened, but we do not count them as inspections.
+
+So 73,630 raw rows became 61,737 completed inspections, and every row we dropped has a reason.
+
+[notebook 02 - charts over time]
+
+Then we explored the data with charts. Inspections grow a little every year, there is no busy season, and most inspections have between 0 and 5 violations.
+
+[pgAdmin - query D2, the fact rows]
+
+Next we built the data warehouse as a star schema. In the middle is the fact table: one row is one completed inspection, and it holds only keys and numbers, like the violation count and whether it failed. Around it are five dimension tables: date, facility, inspection type, result and location. These hold the descriptions.
+
+We also built a snowflake version to compare. It needed 9 joins instead of 3 and was about twice as slow, so we kept the star. We added a second fact table with one row per place per year, which makes it a fact constellation.
+
+[pgAdmin - query D4, the two loads]
+
+To fill it we wrote the ETL: extract, transform, load. The clean file goes into a staging table first, then one SQL procedure adds the new places and inserts the facts. We loaded January 2022 to November 2025 first - 60,608 inspections - and then only December 2025 as an incremental load - 1,129 more. After each load, five checks confirm that nothing was lost or duplicated, and all five return zero.
+
+[pgAdmin - query D7, roll-up]
+
+On this warehouse we answered the ten questions with SQL and OLAP operations: roll-up, drill-down, slice, dice and pivot. The main findings: the fail rate is 23 percent, it fell from 25 percent in 2022 to 21 percent in 2025, complaint inspections fail most at 38 percent, and after a failed inspection the next visit passes 79 percent of the time. So follow-up visits work.
+
+Vishwaraj will now show our three models.
+
+
+========================================================================
+3. VISHWARAJ - THE THREE MODELS  (4:30 - 6:30, slides 7-8)
+========================================================================
+
+Thank you, Omkar.
+
+All three models read from the warehouse, not from the raw file. We made one table where each inspection also remembers the previous inspection of the same place: its result, its violations and how many days ago it was.
+
+We always train on 2022 to 2024 and test on 2025, so the model never sees the future.
+
+[notebook 07 - results table]
+
+First, regression: we predict how many violations an inspection will find. Our model is off by 2.45 violations on average, compared with 2.71 if we just guess the average. R-squared is 0.12, so it is weak. That is an honest result: the real causes, like how clean the kitchen is, are not in the data.
+
+[notebook 08 - rules table]
+
+Second, association rules: what happens together. We used Apriori and FP-Growth, and both found the same 1,198 patterns. The strongest rule is: if an inspection has 10 or more violations, it fails 69 percent of the time. That is three times the normal rate, and that "three times" is called the lift.
+
+[Rushikesh quietly starts Replay_Stream.cmd here]
+[notebook 09 - tree and ROC curve]
+
+Third, a decision tree: will this inspection fail? We tuned it on 2024. A very deep tree just memorised the training data - that is overfitting - so we limited it. The final tree has an AUC of 0.635, where 0.5 means guessing. Only about one in five inspections fail, so we lowered the cut-off to 0.217, and then the tree catches 61 percent of the fails. The most important clue is whether the previous inspection failed.
+
+So the tree can help the city decide which places to inspect first.
+
+Rushikesh will now show the other two warehouses and the live demo.
+
+
+========================================================================
+4. RUSHIKESH - DISTRIBUTED, REAL-TIME, DASHBOARD AND CONCLUSION  (6:30 - 10:00, slides 9-10)
+========================================================================
+
+Thank you, Vishwaraj.
+
+[pgAdmin on port 5440 - the Citus queries]
+
+The brief asks for a distributed warehouse. We used Citus, which turns PostgreSQL into a cluster. Here are the three nodes: one coordinator on port 5440 and two workers on 5441 and 5442.
+
+The fact table is cut into 32 pieces called shards, 16 on each worker. We split it by facility, because facility has about 17,000 different values and spreads the rows evenly. The small dimension tables are copied to every worker, so joins stay on one machine.
+
+All 25 of our test queries gave exactly the same answers as the single server. With small data Citus is slower, because the coordinator has to talk to the workers; from about half a million rows it becomes faster.
+
+[Grafana - numbers rising]
+
+The brief also asks for a real-time warehouse. The city only publishes a historical file, so we replay the last three months of 2025 as if they were happening now, and we label it clearly as a simulation.
+
+A Python producer sends each inspection as a message to Kafka, a message queue. Spark reads the messages every two seconds and checks each one; broken messages go to a separate table. The good ones go into ClickHouse, a very fast database, and Grafana shows them, refreshing every five seconds.
+
+You can see the inspections, fails and passes going up right now. We also sent 24 deliberately broken messages, and all 24 were caught. An event takes about 1.8 seconds to appear on this screen.
+
+[dashboard - Overview page, then Data mining page]
+
+For a business user, we built this dashboard: one HTML page that opens with a double-click. It has the four sections the brief asks for, plus a page for the models and one for the three warehouses. Every chart reads from our warehouse, so the numbers match the report.
+
+[slide 10]
+
+To compare the three warehouses: the batch warehouse is the simplest and the best for history and reports. The distributed one gives the same answers and grows with the data. The real-time one is the only one that shows things live, but it needs four services.
+
+Our recommendation: use the batch warehouse as the main system, because Chicago adds only about 16,000 inspections a year. Add real-time only for live monitoring, and Citus only when the data outgrows one server.
+
+Thank you, ma'am. We are happy to take your questions.
+
+
+========================================================================
+IF MA'AM ASKS "WHO DID WHAT?"  (Rushikesh answers)
+========================================================================
+
+Aryan       - the problem, the dataset and the ten business questions.
+Omkar       - data cleaning, EDA, the star schema, the ETL and the OLAP queries.
+Vishwaraj   - the analytics table and the three models: regression, association rules, decision tree.
+Rushikesh   - setting up and running the whole project, Citus, the real-time pipeline, the dashboard and the comparison.
+
+If you do not know an answer, say: "That part was done by [name], they can explain it better," and look at them.
+
+
+========================================================================
+NUMBERS TO REMEMBER
+========================================================================
+
+73,630 raw rows -> 61,737 completed inspections
+29 duplicates removed, 217 facility types -> 7 groups, 11,864 visits that never happened
+Initial load 60,608 + incremental load 1,129; 5 checks, all zero
+Star 3 joins vs snowflake 9 joins
+Fail rate 23.1%; 24.9% (2022) -> 21.1% (2025); complaints 37.6%; after a fail, 79% pass next
+Regression: MAE 2.45 vs 2.71, R-squared 0.12
+Rules: 1,198 itemsets; 10+ violations => Fail, 69%, lift 3.0
+Tree: AUC 0.635; cut-off 0.217 catches 61% of fails
+Citus: 3 nodes, 32 shards, 25 of 25 identical answers
+Real-time: 3,647 events, 24 of 24 broken caught, about 1.8 seconds
