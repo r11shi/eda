@@ -2,7 +2,7 @@
 
 Our first data-science project. We took four years of Chicago food inspections, cleaned them, stored them in a data warehouse, answered the city's questions with SQL, trained three simple models, and stored the same data in two more kinds of warehouse (distributed and real-time) to compare them.
 
-Group project · Department of Computer Engineering · Guide: **Mrs. Shubhangi Kale**
+Group project · Department of Computer Engineering · Guide: **Mrs. Shubhangi Kale** · Source code: <https://github.com/r11shi/eda>
 
 | PRN | Name | Parts |
 |---|---|---|

@@ -28,6 +28,7 @@ DEPARTMENT = "Computer Engineering"
 COURSE = "Data Analytics (MDM)"
 GUIDE = "Mrs. Shubhangi Kale"
 YEAR = "2026-27"
+REPO = "https://github.com/r11shi/eda"
 TITLE = "Food Safety and Restaurant Inspection Analytics"
 SUBTITLE = "Data Warehousing, OLAP and Data Mining on Chicago Food Inspections"
 STUDENTS = [("Omkar Patil", "202502040010"), ("Aryan Tandale", "202502040013"), ("Rushikesh Maddewad", "202502040037"), ("Vishwaraj Savairam", "202502040035")]
@@ -359,7 +360,8 @@ def cover():
     P("Under the guidance of", 10.5, WD_ALIGN_PARAGRAPH.CENTER, 2)
     P(f"**{GUIDE}**", 12, WD_ALIGN_PARAGRAPH.CENTER, 18)
     P(f"Department of {DEPARTMENT}", 10.5, WD_ALIGN_PARAGRAPH.CENTER, 6, STONE)
-    P(f"**Academic Year {YEAR}**", 11, WD_ALIGN_PARAGRAPH.CENTER, 14)
+    P(f"**Academic Year {YEAR}**", 11, WD_ALIGN_PARAGRAPH.CENTER, 10)
+    P(f"Source code: **{REPO}**", 10, WD_ALIGN_PARAGRAPH.CENTER, 12)
     P("All numbers in this report come from the files in `results/`, which `python run_all.py` regenerates from the data in `data/raw/`.", 9, WD_ALIGN_PARAGRAPH.CENTER, 0, STONE, True)
 
 
@@ -780,6 +782,8 @@ def chapter7():
 def chapter8():
     state["chap"] = 8
     h1("8 Code Appendix")
+    P(f"The complete source code, notebooks, data, results and documentation are published at **{REPO}**. Clone it with `git clone {REPO}.git`; "
+      "`README.md` explains how to run every part.")
     P("The files below are reproduced verbatim from the repository. The curation rules (`etl/curation.py`), the remaining SQL files, the notebooks (curation, EDA, regression, association rules, decision tree) and the Citus and streaming set-up scripts are in the repository and are listed in the README.")
     for rel, lang in [("run_all.py", "Python"), ("etl/config.py", "Python"), ("etl/run_etl.py", "Python"), ("sql/01_schema.sql", "SQL (PostgreSQL)"), ("sql/02_load_batch.sql", "SQL (PL/pgSQL)"), ("sql/04_validation.sql", "SQL (PostgreSQL)"),
                       ("sql/08_analytics_mart.sql", "SQL (PostgreSQL)"), ("etl/model_comparison.py", "Python"), ("etl/distributed_citus.py", "Python"), ("streaming/producer.py", "Python"),
@@ -791,17 +795,14 @@ def chapter9():
     state["chap"] = 9
     h1("9 Presentation Slides")
     pngs = sorted(SLIDES_DIR.glob("slide-*.png"))
-    P(f"The {len(pngs) if pngs else 10}-slide deck is `docs/Presentation.pptx`, designed in Gamma. It follows the narrative of the report: the problem, the pipeline, the warehouse, the findings, the three models, the other two warehouses and the conclusion.")
+    P(f"The {len(pngs) if pngs else 17}-slide deck is `docs/Presentation.pptx` (made by `build_docs/build_slides.py`, also as the slideshow "
+      "`deliverables/Food_Safety_Slides.html`). It follows the story of the report: the problem, the tools, the approach, the seven steps and the comparison.")
     if not pngs:
         P("(Slide images are created by this script when LibreOffice is installed; they were not available for this build.)", italic=True); return
-    from pptx import Presentation
-    prs = Presentation(str(ROOT / "docs" / "Presentation.pptx")); titles = []
-    for sl in prs.slides:
-        texts = [sh.text_frame.text for sh in sl.shapes if sh.has_text_frame and sh.text_frame.text.strip()]
-        heads = [t for t in texts if t.strip() and not t.strip().isupper()]          # skip small all-caps labels above the title
-        ttl = sl.shapes.title.text if sl.shapes.title is not None and sl.shapes.title.text.strip() else (heads[0] if heads else "")
-        ttl = ttl.splitlines()[0] if ttl else ""
-        titles.append(ttl)
+    titles = ["Title", "The problem", "Tools", "The whole project in one picture", "Step 1: cleaning the data", "Step 2: the database design",
+              "Step 3: loading the data", "Step 4: answering the questions", "Step 4: dashboard", "Step 5: prediction 1 (regression)",
+              "Step 5: patterns (association rules)", "Step 5: prediction 2 (decision tree)", "Step 6: the database on 3 machines (Citus)",
+              "Step 7: live dashboard (real-time warehouse)", "Comparison of the three warehouses", "Running the project", "Thank you"]
     for i, png in enumerate(pngs):
         p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.keep_with_next = True; p.paragraph_format.space_after = Pt(2)
         p.add_run().add_picture(str(png), width=Inches(5.9))
@@ -852,7 +853,8 @@ def references():
                 "Grafana Labs. *Grafana documentation*. https://grafana.com/docs/grafana/latest/",
                 "Citus Data. *Citus documentation*. https://docs.citusdata.com",
                 "Apache Software Foundation. *Apache Kafka* and *Apache Spark Structured Streaming* documentation. https://kafka.apache.org, https://spark.apache.org",
-                "ClickHouse, Inc. *ClickHouse documentation*. https://clickhouse.com/docs"]:
+                "ClickHouse, Inc. *ClickHouse documentation*. https://clickhouse.com/docs",
+                f"Project repository (source code, notebooks, data and documentation of this report): {REPO}"]:
         p = doc.add_paragraph(); p.paragraph_format.left_indent = Inches(0.3); p.paragraph_format.first_line_indent = Inches(-0.3); p.paragraph_format.space_after = Pt(4)
         rich(p, ref, 10.5)
 
