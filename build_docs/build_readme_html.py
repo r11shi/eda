@@ -95,7 +95,8 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="
 PAGES = [  # (markdown, title, top line, full page, page for sharing)
     ("docs/presentation/FINAL_GUIDE_WITH_SLIDES.md", "Final Presentation Guide with Slides", "Final presentation guide · with the slides", "docs/presentation/Final_Guide_with_Slides.html", "deliverables/Final_Guide_with_Slides.html"),
     ("docs/presentation/FINAL_GUIDE.md", "Final Presentation Guide", "Final presentation guide", "docs/presentation/Final_Guide.html", "deliverables/Final_Guide.html"),
-    ("README.md", "Food Safety Analytics Guide", "Study guide · every part in detail", "README.html", "deliverables/Project_Guide.html"),
+    ("README.md", "Food Safety Analytics", "Project overview", "README.html", "deliverables/Project_Overview.html"),
+    ("docs/presentation/STUDY_GUIDE.md", "Food Safety Analytics Study Guide", "Study guide · every part in detail", "docs/presentation/Study_Guide.html", "deliverables/Project_Guide.html"),
     ("docs/presentation/DOUBTS.md", "Food Safety Doubts and Answers", "Doubts and answers", "docs/presentation/Doubts.html", "deliverables/Doubts.html"),
     ("docs/presentation/TEAM_SCRIPT.md", "Food Safety Team Script", "Team script · 10-minute presentation", "docs/presentation/Team_Script.html", "deliverables/Team_Script.html"),
 ]
