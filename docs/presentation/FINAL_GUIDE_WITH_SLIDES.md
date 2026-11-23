@@ -39,57 +39,57 @@ The deck is `deliverables\Food_Safety_Presentation.pptx` (also `Food_Safety_Slid
 
 > **Slide 2:** The problem
 
-![Slide 3: What we used](../slides_new/slide-03.png)
+![Slide 3: Tools](../slides_new/slide-03.png)
 
-> **Slide 3:** What we used
+> **Slide 3:** Tools
 
-![Slide 4: Our approach](../slides_new/slide-04.png)
+![Slide 4: The whole project in one picture](../slides_new/slide-04.png)
 
-> **Slide 4:** Our approach
+> **Slide 4:** The whole project in one picture
 
-![Slide 5: Part A · Data curation](../slides_new/slide-05.png)
+![Slide 5: Step 1 · Cleaning the data](../slides_new/slide-05.png)
 
-> **Slide 5:** Part A · Data curation
+> **Slide 5:** Step 1 · Cleaning the data
 
-![Slide 6: Part B · Dimensional model](../slides_new/slide-06.png)
+![Slide 6: Step 2 · The database design](../slides_new/slide-06.png)
 
-> **Slide 6:** Part B · Dimensional model
+> **Slide 6:** Step 2 · The database design
 
-![Slide 7: Part C · ETL and validation](../slides_new/slide-07.png)
+![Slide 7: Step 3 · Loading the data](../slides_new/slide-07.png)
 
-> **Slide 7:** Part C · ETL and validation
+> **Slide 7:** Step 3 · Loading the data
 
-![Slide 8: Part F · OLAP and findings](../slides_new/slide-08.png)
+![Slide 8: Step 4 · Answering the questions](../slides_new/slide-08.png)
 
-> **Slide 8:** Part F · OLAP and findings
+> **Slide 8:** Step 4 · Answering the questions
 
-![Slide 9: Part F · Dashboard](../slides_new/slide-09.png)
+![Slide 9: Step 4 · Dashboard](../slides_new/slide-09.png)
 
-> **Slide 9:** Part F · Dashboard
+> **Slide 9:** Step 4 · Dashboard
 
-![Slide 10: Part G · Regression](../slides_new/slide-10.png)
+![Slide 10: Step 5 · Prediction 1](../slides_new/slide-10.png)
 
-> **Slide 10:** Part G · Regression
+> **Slide 10:** Step 5 · Prediction 1
 
-![Slide 11: Part H · Association rules](../slides_new/slide-11.png)
+![Slide 11: Step 5 · Patterns](../slides_new/slide-11.png)
 
-> **Slide 11:** Part H · Association rules
+> **Slide 11:** Step 5 · Patterns
 
-![Slide 12: Part I · Decision tree](../slides_new/slide-12.png)
+![Slide 12: Step 5 · Prediction 2](../slides_new/slide-12.png)
 
-> **Slide 12:** Part I · Decision tree
+> **Slide 12:** Step 5 · Prediction 2
 
-![Slide 13: Part D · Distributed warehouse](../slides_new/slide-13.png)
+![Slide 13: Step 6 · Database on 3 machines](../slides_new/slide-13.png)
 
-> **Slide 13:** Part D · Distributed warehouse
+> **Slide 13:** Step 6 · Database on 3 machines
 
-![Slide 14: Part E · Real-time warehouse](../slides_new/slide-14.png)
+![Slide 14: Step 7 · Live dashboard](../slides_new/slide-14.png)
 
-> **Slide 14:** Part E · Real-time warehouse
+> **Slide 14:** Step 7 · Live dashboard
 
-![Slide 15: Part J · Comparison](../slides_new/slide-15.png)
+![Slide 15: Comparison](../slides_new/slide-15.png)
 
-> **Slide 15:** Part J · Comparison
+> **Slide 15:** Comparison
 
 ![Slide 16: Running the project](../slides_new/slide-16.png)
 
@@ -148,7 +148,8 @@ The project folder is `E:\web\EDA\.claude\worktrees\project-setup-warehouse-veri
 
 **To run a query in pgAdmin:** select the query text with the mouse, press **F5**. The queries are labelled D1 … D10 in `demo_queries.sql`.
 
-**To run every part one after another in a real terminal:** double-click **`Run_All_Parts.cmd`** (about 9 minutes, with `Start_Project.cmd` running). It shows each command in green with its real output, and saves each part's output to `docsun_logs\part_A.log`, `part_B.log`, … so you can read them later.
+**To run every part one after another in a real terminal:** double-click **`Run_All_Parts.cmd`** (about 9 minutes, with `Start_Project.cmd` running). It shows each command in green with its real output, and saves each part's output to `docs
+un_logs\part_A.log`, `part_B.log`, … so you can read them later.
 
 **To run any part live:** `Project_Menu.cmd` → a number. 1 = A · 2 = B · 3 = C · 4 = F · 5 = analytics table · 6 = G · 7 = H · 8 = I · 9 = D · 10 = E · 11-14 = show only (data files, warehouse tables, Citus, real-time data). Each prints the commands it runs.
 

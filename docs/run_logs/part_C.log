@@ -22,25 +22,25 @@ $ psql -h localhost -U foodsafety -d foodsafety -P pager=off -c 'SELECT batch_id
 
 
 $ python etl/run_queries.py
-Q1a       4 rows      21.0 ms  Q1a Annual inspection volume
-Q1b      48 rows      29.5 ms  Q1b Monthly inspection volume
-Q2       15 rows      42.8 ms  Q2 Facility types receiving the most inspections
-Q3        4 rows      27.2 ms  Q3 Pass, conditional-pass and fail rates by year
-Q4        4 rows      40.8 ms  Q4 Results across risk categories
-Q5        8 rows      27.5 ms  Q5 Inspection types associated with higher failure rates
-Q6a       3 rows      49.2 ms  Q6a Violation counts by result group
-Q6b      15 rows      99.1 ms  Q6b Most common violation rule numbers (rule-level detail is kept in staging, not in the star schema)
-Q7a       5 rows      26.1 ms  Q7a Geographic area groups: failures and failure rate
-Q7b      10 rows      26.4 ms  Q7b ZIP codes with the highest failure rate (at least 200 inspections)
-Q7c      10 rows      32.1 ms  Q7c ZIP codes with the most failures (counts, not rates)
-Q8a       4 rows     114.7 ms  Q8a Repeat inspections: fail rate by the position of the inspection in the facility's history (licensed facilities only)
-Q8b       1 rows     137.3 ms  Q8b Repeat inspections: what happens at the next inspection after a failed one
-Q8c      10 rows      55.9 ms  Q8c Facilities with the most inspections in the period
+Q1a       4 rows      13.1 ms  Q1a Annual inspection volume
+Q1b      48 rows      19.7 ms  Q1b Monthly inspection volume
+Q2       15 rows      30.4 ms  Q2 Facility types receiving the most inspections
+Q3        4 rows      16.5 ms  Q3 Pass, conditional-pass and fail rates by year
+Q4        4 rows      26.1 ms  Q4 Results across risk categories
+Q5        8 rows      22.6 ms  Q5 Inspection types associated with higher failure rates
+Q6a       3 rows      39.4 ms  Q6a Violation counts by result group
+Q6b      15 rows      68.2 ms  Q6b Most common violation rule numbers (rule-level detail is kept in staging, not in the star schema)
+Q7a       5 rows      18.4 ms  Q7a Geographic area groups: failures and failure rate
+Q7b      10 rows      14.9 ms  Q7b ZIP codes with the highest failure rate (at least 200 inspections)
+Q7c      10 rows      14.8 ms  Q7c ZIP codes with the most failures (counts, not rates)
+Q8a       4 rows      71.4 ms  Q8a Repeat inspections: fail rate by the position of the inspection in the facility's history (licensed facilities only)
+Q8b       1 rows     121.5 ms  Q8b Repeat inspections: what happens at the next inspection after a failed one
+Q8c      10 rows      50.9 ms  Q8c Facilities with the most inspections in the period
                                            query         stage  median_ms                                           plan_top
-history of one facility (WHERE facility_key = x) without index       5.02 Aggregate  (cost=1473.83..1473.84 rows=1 width=16)
-history of one facility (WHERE facility_key = x)    with index       0.40     Aggregate  (cost=90.77..90.78 rows=1 width=16)
-       one month of inspections (date_key range) without index       5.09 Aggregate  (cost=1632.73..1632.74 rows=1 width=16)
-       one month of inspections (date_key range)    with index       0.64     Aggregate  (cost=34.38..34.39 rows=1 width=16)
-                  one batch (WHERE batch_id = 2) without index       7.14  Aggregate  (cost=1476.55..1476.56 rows=1 width=8)
-                  one batch (WHERE batch_id = 2)    with index       0.53      Aggregate  (cost=26.23..26.24 rows=1 width=8)
+history of one facility (WHERE facility_key = x) without index       5.08 Aggregate  (cost=1473.82..1473.83 rows=1 width=16)
+history of one facility (WHERE facility_key = x)    with index       0.45     Aggregate  (cost=90.77..90.78 rows=1 width=16)
+       one month of inspections (date_key range) without index       5.09 Aggregate  (cost=1632.80..1632.81 rows=1 width=16)
+       one month of inspections (date_key range)    with index       0.57     Aggregate  (cost=40.54..40.55 rows=1 width=16)
+                  one batch (WHERE batch_id = 2) without index       6.56  Aggregate  (cost=1476.45..1476.46 rows=1 width=8)
+                  one batch (WHERE batch_id = 2)    with index       0.42      Aggregate  (cost=26.81..26.82 rows=1 width=8)
 

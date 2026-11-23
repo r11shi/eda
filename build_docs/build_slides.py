@@ -42,131 +42,113 @@ def two(left, right, ratio="1fr 1.25fr"):
 
 S = []
 S.append(f'''<section class="slide title"><div class="tband"><div class="kicker">Data Analytics (MDM) · Department of Computer Engineering · 2026-27</div>
-<h1>Food Safety &amp; Restaurant<br>Inspection Analytics</h1><p class="sub">Data warehousing, OLAP and data mining on four years of Chicago food inspections</p></div>
+<h1>Food Safety &amp; Restaurant<br>Inspection Analytics</h1><p class="sub">What four years of Chicago food inspections tell us</p></div>
 <div class="team"><div><b>Aryan Tandale</b><span>202502040013</span></div><div><b>Omkar Patil</b><span>202502040010</span></div>
 <div><b>Vishwaraj Savairam</b><span>202502040035</span></div><div><b>Rushikesh Maddewad</b><span>202502040037</span></div></div>
 <p class="guide">Guide: <b>Mrs. Shubhangi Kale</b></p></section>''')
 
-S.append(slide("The problem", "Which places fail inspections, where, when, and can we predict it?",
-    two(ul("City of Chicago <b>Food Inspections</b> open data, January 2022 – December 2025",
-           "Each record: place, facility type, risk, address, date, inspection type, <b>result</b>, violations text, coordinates",
-           "The brief: clean the data, build a <b>data warehouse</b>, answer <b>10 business questions</b>, build <b>3 models</b>, and compare <b>batch, distributed and real-time</b> warehouses"),
-        stats(("73,630", "raw records"), ("61,737", "completed inspections"), ("17,084", "places"), ("4 years", "2022 – 2025")), "1.2fr 1fr")))
+S.append(slide("The problem", "Which places fail food inspections, and can we predict it?",
+    two(ul("Chicago checks every restaurant, shop and school that serves food",
+           "Each check ends in <b>Pass</b>, <b>Pass with conditions</b> or <b>Fail</b>",
+           "The city publishes every result. We used <b>2022 – 2025</b>",
+           "Our job: clean the data, store it well, answer <b>10 questions</b>, and try to <b>predict</b> failures"),
+        stats(("73,630", "records we started with"), ("61,737", "real inspections"), ("17,084", "places"), ("4 years", "2022 – 2025")), "1.2fr 1fr")))
 
-tools = [("Language & notebooks", "Python 3 · Jupyter / JupyterLab"), ("Data handling", "pandas · NumPy"),
-         ("Charts", "Matplotlib · Seaborn · Plotly"), ("Warehouse", "PostgreSQL 18 · SQL · PL/pgSQL · pgAdmin"),
-         ("Data mining", "scikit-learn (regression, decision tree) · statsmodels · mlxtend (Apriori, FP-Growth)"),
-         ("Distributed warehouse", "Citus 14.3 (PostgreSQL extension)"), ("Streaming", "Apache Kafka 3.9 · Apache Spark 4.0 Structured Streaming"),
-         ("Real-time store & dashboard", "ClickHouse 26.3 · Grafana 11.3"), ("Business dashboard", "HTML page built with Plotly"),
-         ("Platform", "Windows 11 + WSL 2 (Ubuntu) · Git & GitHub")]
-S.append(slide("What we used", "Tools and technologies",
+tools = [("Programming", "Python, in Jupyter notebooks"), ("Working with data", "pandas"),
+         ("Charts", "Matplotlib, Seaborn, Plotly"), ("Main database", "PostgreSQL (pgAdmin to view it)"),
+         ("Prediction & patterns", "scikit-learn, mlxtend"), ("Database on 3 machines", "Citus"),
+         ("Live data", "Kafka, Spark, ClickHouse"), ("Live dashboard", "Grafana"),
+         ("Business dashboard", "a web page (HTML)"), ("Computer setup", "Windows + Ubuntu (WSL), GitHub")]
+S.append(slide("What we used", "Tools",
     '<div class="tools">' + "".join(f'<div><b>{a}</b><span>{b}</span></div>' for a, b in tools) + "</div>"))
 
-S.append(slide("Our approach", "One pipeline, three warehouses",
-    two(ul("<b>Clean</b> the raw file with written, logged rules (Python)",
-           "<b>Load</b> it into a <b>star-schema warehouse</b> in PostgreSQL (ETL)",
-           "<b>Ask</b> the 10 questions with SQL and OLAP; show them on a dashboard",
-           "<b>Learn</b> from the warehouse: regression, association rules, decision tree",
-           "<b>Copy</b> the same data into a <b>distributed</b> (Citus) and a <b>real-time</b> (Kafka → Spark → ClickHouse → Grafana) warehouse and <b>compare</b> by measurement"),
-        svg("pipeline"), "1fr 1.35fr")))
+S.append(slide("Our approach", "The whole project in one picture",
+    two(ul("<b>Clean</b> the data",
+           "<b>Store</b> it in a database built for questions (a data warehouse)",
+           "<b>Ask</b> the 10 questions and show the answers on a dashboard",
+           "<b>Predict</b> with 3 simple models",
+           "<b>Copy</b> the same data into 2 other kinds of storage and <b>compare</b>"),
+        svg("pipeline"), "0.85fr 1.4fr")))
 
-S.append(slide("Part A · Data curation", "Profile first, then fix every problem with a logged rule",
-    two(ul("<b>Profiled</b> every column: missing values, odd codes, duplicates, spellings",
-           "<b>29</b> duplicate reports removed; risk <b>“All”</b> → Unknown",
-           "<b>217</b> hand-typed facility types → <b>7</b> groups",
-           "Violation count <b>extracted from the text</b>; a fail with no text → unknown, not 0",
-           "<b>11,864</b> visits that never happened: kept, not counted",
-           "New columns: season, area, violation band, result / risk / facility group"),
+S.append(slide("Step 1 · Cleaning the data", "Find every problem, fix it, write it down",
+    two(ul("Some rows were visits that <b>never happened</b> (shop closed, no entry): kept, but not counted",
+           "<b>29</b> reports entered twice: removed",
+           "<b>217</b> spellings of shop type → <b>7</b> groups",
+           "Violations were one long sentence: we <b>counted</b> them",
+           "Result: <b>73,630 rows → 61,737 real inspections</b>"),
         svg("cleaning_funnel") + png("nb_02_eda_3.png", 1300), "1fr 1.2fr")))
 
-S.append(slide("Part B · Dimensional model", "Star schema → fact constellation", cls="er", body=
-    two(ul("<b>Grain:</b> one completed inspection of one place on one date",
-           "<b>Fact table:</b> only keys and numbers (violations, fail / pass flags)",
-           "<b>5 dimensions:</b> date, facility, inspection type, result, location",
-           "<b>Surrogate keys</b> + an <b>Unknown row (0)</b> in every dimension",
-           "Snowflake: <b>9 joins vs 3</b>, about <b>2× slower</b> → star chosen",
-           "<b>2nd fact</b> (place × year): yearly questions <b>~7× faster</b>"),
-        svg("schema_er"), "0.8fr 1.5fr")))
+S.append(slide("Step 2 · The database design", "A star: one main table, five lookup tables",
+    two(ul("<b>Main table:</b> one row per inspection, only numbers",
+           "<b>Lookup tables:</b> when, which place, why, result, where",
+           "Simple and fast to ask questions",
+           "A second main table: one row per place per year"),
+        svg("schema_er"), "0.7fr 1.6fr"), cls="er"))
 
-S.append(slide("Part C · ETL and validation", "Staging → one load procedure → five checks",
-    two(ul("<b>Extract:</b> bulk COPY into a staging table, per batch",
-           "<b>Transform + load:</b> one SQL procedure adds new places and inserts facts with looked-up keys, in one transaction",
-           "<b>Initial load</b> Jan 2022 – Nov 2025: <b>60,608</b>",
-           "<b>Incremental load</b> Dec 2025: <b>+1,129</b>, nothing rebuilt",
-           "<b>5 checks</b> after each load: all <b>0</b>",
-           "<b>Indexes:</b> a lookup 6.5 ms → 0.5 ms"),
+S.append(slide("Step 3 · Loading the data", "Load it, then check nothing went wrong",
+    two(ul("The clean file goes into a <b>waiting table</b> first",
+           "One program moves it into the database",
+           "First load: <b>2022 – Nov 2025</b> (60,608)",
+           "Then only <b>December 2025</b> (1,129), no reload",
+           "<b>5 checks</b> after each load: all OK"),
         svg("etl") + png("screens/psql_checks.png", 1300), "1fr 1.3fr")))
 
-S.append(slide("Part F · OLAP and findings", "The 10 business questions, answered with SQL on the star schema",
+S.append(slide("Step 4 · Answering the questions", "What the data says",
     two(svg("olap"),
-        stats(("23.1%", "inspections that fail"), ("24.9% → 21.1%", "fail rate, 2022 → 2025"), ("37.6%", "complaint inspections fail (highest)"),
-              ("79%", "next visit passes after a fail"), ("~70%", "of inspections are restaurants"), ("13 days", "average gap to the follow-up")), "1.15fr 1fr")))
+        stats(("23%", "of inspections fail"), ("25% → 21%", "failing less each year"), ("38%", "complaint checks fail most"),
+              ("79%", "pass the next visit after a fail"), ("7 in 10", "inspections are restaurants"), ("13 days", "until the follow-up visit")), "1.1fr 1fr")))
 
-S.append(slide("Part F · Dashboard", "One HTML page, six sections, read from the warehouse",
+S.append(slide("Step 4 · Dashboard", "All the answers on one page",
     f'<div class="fig wide">{png("screens/dashboard_overview.png", 1600)}</div>'))
 
-S.append(slide("Part G · Regression", "Predict the number of violations from what is known before the visit",
-    two(ul("Models read an <b>analytics table built from the warehouse</b>: each inspection carries the <b>previous</b> inspection of the same place",
-           "<b>Time split:</b> train 2022 – 2024, test 2025",
-           "Baseline vs simple vs <b>multiple linear regression</b>",
-           "<b>MAE 2.45</b> vs 2.71 for guessing the average; <b>R² 0.12</b>",
-           "Low R²: the real causes (cleanliness, staff) are not in the data"),
+S.append(slide("Step 5 · Prediction 1", "How many problems will an inspection find?",
+    two(ul("Learn from <b>2022 – 2024</b>, test on <b>2025</b>",
+           "Most useful clue: the place's <b>last inspection</b>",
+           "Our guess is off by <b>2.45</b> problems on average",
+           "A plain average guess is off by <b>2.71</b>",
+           "Hard to predict: the real causes (cleanliness, staff) are not in the data"),
         svg("regression") + png("nb_07_regression_1.png", 1100), "1fr 1.2fr")))
 
-S.append(slide("Part H · Association rules", "What happens together? Apriori and FP-Growth",
-    two(ul("Each inspection = a basket of <b>7 items</b> (type, risk, inspection type, result, violation band, area, season)",
-           "Min support 2%: both algorithms find the <b>same 1,198</b> frequent sets",
-           "Rules: confidence ≥ 30%, lift ≥ 1.3, definitional rules removed → <b>14</b> kept",
-           "<b>10+ violations ⇒ Fail</b>: 69%, lift 3.0",
-           "<b>Low risk ⇒ Grocery store</b>: 62%, lift 6.5"),
+S.append(slide("Step 5 · Patterns", "What usually happens together?",
+    two(ul("We looked for things that often appear <b>together</b>",
+           "<b>10 or more problems → Fail</b>, 69% of the time",
+           "That is <b>3 times</b> more often than normal",
+           "<b>Low-risk places</b> are mostly <b>grocery stores</b>"),
         svg("assoc_rule") + png("nb_08_association_mining_1.png", 1100), "1fr 1.2fr")))
 
-S.append(slide("Part I · Decision tree", "Will this inspection fail?",
-    two(ul("Train 2022 – 23, <b>tune on 2024</b>, test once on 2025",
-           "<b>420</b> setting combinations; deep trees <b>overfit</b> → depth 8, ≥ 200 per leaf",
-           "<b>AUC 0.635</b> (0.5 = guessing)",
-           "Cut-off 0.5 catches 4% of fails; <b>0.217 catches 61%</b>",
-           "Strongest clue: <b>previous result = Fail</b>"),
+S.append(slide("Step 5 · Prediction 2", "Will this inspection fail?",
+    two(ul("A <b>decision tree</b>: a list of yes / no questions",
+           "Strongest clue: <b>did the last inspection fail?</b>",
+           "It catches <b>6 in 10</b> failing places",
+           "Useful to decide <b>which places to inspect first</b>"),
         svg("decision_tree") + png("nb_09_decision_tree_3.png", 1100), "1fr 1.2fr")))
 
-S.append(slide("Part D · Distributed warehouse", "Citus: one coordinator, two workers, 32 shards",
-    two(ul("Fact table <b>hash-distributed by facility</b> (17,084 values, no skew) into <b>32 shards</b>, 16 per worker",
-           "Dimensions = <b>reference tables</b> copied to every node",
-           "5 queries × 5 sizes (61,737 → 2,000,000 rows)",
-           "<b>25 of 25</b> answers identical to the single server",
-           "Slower on small data; mostly faster from ~500,000 rows"),
+S.append(slide("Step 6 · Database on 3 machines", "Same data, split across computers",
+    two(ul("One <b>main computer</b> takes the question",
+           "Two <b>helper computers</b> each hold half of the data",
+           "All 25 test questions gave the <b>same answers</b>",
+           "Slower with small data, faster with big data"),
         svg("citus") + png("citus_vs_centralized.png", 1200), "1fr 1.2fr")))
 
-S.append(slide("Part E · Real-time warehouse", "Replay simulation: Kafka → Spark → ClickHouse → Grafana",
-    two(ul("Oct – Dec 2025 replayed in date order, labelled <b>REPLAY_SIMULATION</b>",
-           "Spark checks every message every <b>2 s</b>; broken ones go to a dead-letter table",
-           "<b>3,647</b> events stored; <b>24 of 24</b> broken test events caught",
-           "About <b>1.8 s</b> from sending to Grafana"),
+S.append(slide("Step 7 · Live dashboard", "Inspections shown as they arrive",
+    two(ul("We <b>replay</b> late 2025 as if it were happening now",
+           "Each inspection is sent as a message",
+           "It is checked, stored and shown in about <b>2 seconds</b>",
+           "All <b>24</b> broken test messages were caught"),
         svg("streaming") + png("screens/grafana_realtime.png", 1300), "1fr 1.3fr")))
 
-S.append(slide("Part J · Comparison", "Three warehouses, measured on the same data",
-    '<table><thead><tr><th></th><th>Batch (PostgreSQL)</th><th>Distributed (Citus)</th><th>Real-time</th></tr></thead><tbody>'
-    '<tr><td>Data arrives</td><td>in batches</td><td>in batches</td><td>continuously</td></tr>'
-    '<tr><td>Visible after</td><td>each load</td><td>each load</td><td>≈ 1.8 s</td></tr>'
-    '<tr><td>History &amp; reports</td><td>best</td><td>same answers</td><td>recent only</td></tr>'
-    '<tr><td>Live monitoring</td><td>no</td><td>no</td><td>yes</td></tr>'
-    '<tr><td>Grows by</td><td>bigger server</td><td>more servers</td><td>more servers</td></tr>'
-    '<tr><td>Effort</td><td>low</td><td>medium</td><td>high (4 services)</td></tr></tbody></table>'
-    '<p class="rec"><b>Recommendation:</b> batch warehouse as the main system; real-time only for live monitoring; Citus only when the data outgrows one server.</p>'))
+S.append(slide("Comparison", "Which way of storing data is best?",
+    '<table><thead><tr><th></th><th>Normal database</th><th>On 3 machines</th><th>Live</th></tr></thead><tbody>'
+    '<tr><td>Shows new data</td><td>after each load</td><td>after each load</td><td>in about 2 seconds</td></tr>'
+    '<tr><td>Best for</td><td>history and reports</td><td>very large data</td><td>watching things live</td></tr>'
+    '<tr><td>Effort</td><td>low</td><td>medium</td><td>high</td></tr></tbody></table>'
+    '<p class="rec"><b>Our choice:</b> the normal database is enough for Chicago. Add the live one only if the city wants live monitoring.</p>'))
 
-S.append(slide("Running the project", "One click, or the commands behind it",
-    '<div class="two" style="grid-template-columns:1fr 1fr"><div>'
-    + ul("<b>Start_Project.cmd</b>: starts PostgreSQL, Citus, Kafka, Spark, ClickHouse, Grafana, JupyterLab",
-         "<b>Project_Menu.cmd</b>: runs or shows one part at a time",
-         "<b>Run_All_Parts.cmd</b>: runs every part in order in a terminal and saves each part's output",
-         "<b>Replay_Stream.cmd</b>: live replay for Grafana",
-         "<b>python run_all.py</b>: rebuilds Parts A – I from the raw file in about 10 minutes")
-    + '</div><div><div class="code">wsl -d Ubuntu -u root\n'
-    'cd /mnt/e/web/EDA/.claude/worktrees/\\\n   project-setup-warehouse-verify-e60cea\n\n'
-    '# everything at once (what Start_Project.cmd does)\nbash scripts/run_everything_wsl.sh start\n\n'
-    '# or piece by piece\nbash scripts/setup_postgres.sh        # warehouse\nbash scripts/setup_citus_cluster.sh   # Citus\n'
-    'bash scripts/start_realtime_stack.sh  # Kafka, Spark, ClickHouse\nbash scripts/start_grafana.sh         # Grafana\n'
-    'bash scripts/start_notebooks.sh       # JupyterLab\n\n# one part\nbash scripts/part.sh A      # or B C F G H I D E\n</div></div></div>'))
+S.append(slide("Running the project", "Four buttons",
+    ul("<b>Start_Project.cmd</b>: starts everything (keep the window open)",
+       "<b>Project_Menu.cmd</b>: run or show one step at a time",
+       "<b>Run_All_Parts.cmd</b>: runs every step in order",
+       "<b>Replay_Stream.cmd</b>: starts the live dashboard demo")))
 
 S.append('<section class="slide title end"><div class="tband"><div class="kicker">Food Safety &amp; Restaurant Inspection Analytics</div><h1>Thank you</h1>'
          '<p class="sub">Questions?</p></div></section>')
@@ -187,7 +169,7 @@ h1{font-size:62px;line-height:1.05}
 .body{flex:1;min-height:0}
 .two{display:grid;gap:36px;height:100%}
 .two>div{min-width:0}
-ul{margin:0;padding-left:22px;font-size:19px;line-height:1.5}li{margin:0 0 10px}li::marker{color:var(--acc)}
+ul{margin:0;padding-left:24px;font-size:23px;line-height:1.45}li{margin:0 0 16px}li::marker{color:var(--acc)}
 b{font-weight:600}
 .fig{display:flex;flex-direction:column;gap:14px;align-items:stretch;justify-content:flex-start;min-height:0}
 .fig svg{width:100%;height:auto;max-height:300px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}

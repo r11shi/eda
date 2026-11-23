@@ -7,15 +7,15 @@ $ python etl/run_etl.py all
 Creating schemas, dimensions and fact tables
 INITIAL LOAD: 72,130 curated rows (2022-01-03 .. 2025-11-28)
   [initial] create audit record                              0.007 s
-  [initial] stage 72,130 rows (COPY)                         2.779 s
-  [initial] DQ rules + dimensions + facts (CALL dw.load_batch)   20.542 s
-  [initial] create indexes + ANALYZE                         6.761 s
+  [initial] stage 72,130 rows (COPY)                         1.843 s
+  [initial] DQ rules + dimensions + facts (CALL dw.load_batch)   17.565 s
+  [initial] create indexes + ANALYZE                         4.193 s
   validation [after initial load]: 5 checks, failures = 0
   warehouse after initial load: {'fact_inspection': 60608, 'dim_facility': 16902, 'dim_location': 252, 'dim_inspection_type': 15, 'dim_result': 4, 'fact_facility_annual': 41546}
 INCREMENTAL LOAD: 1,471 curated rows (2025-12-01 .. 2025-12-31)
-  [incremental] create audit record                          0.054 s
-  [incremental] stage 1,471 rows (COPY)                      0.082 s
-  [incremental] DQ rules + dimensions + facts (CALL dw.load_batch)    1.231 s
+  [incremental] create audit record                          0.007 s
+  [incremental] stage 1,471 rows (COPY)                      0.069 s
+  [incremental] DQ rules + dimensions + facts (CALL dw.load_batch)    1.401 s
   validation [after incremental load]: 5 checks, failures = 0
   warehouse after incremental load: {'fact_inspection': 61737, 'dim_facility': 17084, 'dim_location': 252, 'dim_inspection_type': 15, 'dim_result': 4, 'fact_facility_annual': 42154}
 
@@ -27,14 +27,14 @@ $ python etl/model_comparison.py 2>&1 | head -14
                                           criterion  star  snowflake  fact_constellation
                                    Number of tables   6.0       16.0                 7.0
 Joins for QA (year/quarter x facility group x area)   3.0        9.0                 3.0
-                                QA median time (ms)  83.3      160.5                83.3
-                                QB median time (ms)  91.4       87.2                91.4
-         Facility x year question: median time (ms)  30.5       30.5                 2.8
+                                QA median time (ms)  73.7      147.3                73.7
+                                QB median time (ms)  60.5      106.6                60.5
+         Facility x year question: median time (ms)  36.2       36.2                 4.9
                                                         query  star_joins  snowflake_joins  star_ms  snowflake_ms
-QA: fail rate by year, quarter, facility group and area group           3                9     83.3         160.5
-QB: inspections by facility type, risk group and result group           2                5     91.4          87.2
+QA: fail rate by year, quarter, facility group and area group           3                9     73.7         147.3
+QB: inspections by facility type, risk group and result group           2                5     60.5         106.6
 star+constellation schema (dw): 7 tables, 22 MB | snowflake (snow): 16 tables, 13 MB
-dimension bytes: dw 4268032  snow 3366912
+dimension bytes: dw 4251648  snow 3366912
 rows: fact 61737 annual fact 42154 dim_facility 17084
 [('dw.dim_facility', 17084), ('snow.dim_facility', 17084), ('snow.dim_facility_type', 161), ('snow.dim_facility_group', 7), ('dw.dim_date', 1826), ('snow.dim_date', 1826), ('snow.dim_month', 60), ('dw.dim_location', 252), ('snow.dim_location', 252), ('snow.dim_zip', 100)]
 

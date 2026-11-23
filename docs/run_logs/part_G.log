@@ -3,38 +3,3 @@
 Predicts the number of violations. Train 2022-2024, test 2025. Look for MAE and R2.
 
 $ jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=1800 notebooks/07_regression.ipynb 2>&1 | grep -v -i -E 'warning|kernel|nbconvert' || true
-  _validate(nbdict, ref, version, version_minor, relax_add_props)
-
-Mart rows: 61,737 | columns: 29
-Train: 45266 inspections (2022-2024) | Test: 15919 inspections (2025)
-Mean violations: train 3.850 | test 3.558
-Share of inspections with a prior inspection: train 67.2% | test 87.8%
-Simple linear regression: ViolationCount = 2.737 + 0.209 x PriorViolationCount   (trained on 30436 inspections with a prior inspection)
-/root/venv/lib/python3.14/site-packages/sklearn/preprocessing/_encoders.py:262: UserWarning: Found unknown categories in columns [0, 5] during transform. These unknown categories will be encoded as the infrequent category.
-  warnings.warn(msg, UserWarning)
-Number of encoded features in the multiple model: 102
-Residual mean -0.233 | std 3.267 | skewness 1.42
-Multiple linear regression: intercept = 2.307
-
-Largest effects (change in expected violations versus the reference category):
-Prior-history and risk coefficients:
-Highest variance inflation factors (VIF > 5 suggests collinearity; > 10 is serious):
-Number of features with VIF > 5: 5 of 102
-
-Breusch-Pagan test for heteroscedasticity: LM = 3504.1, p-value = 0.00e+00
-Outlier fence (Q3 + 1.5 x IQR) = 14 violations; 1.9% of 2025 inspections are above it
-Test RMSE: all inspections 3.276 | without the outliers 2.865
-Share of the total squared error that comes from the outliers: 24.9%
-Model trained on a capped target (cap = 17): test MAE 2.432, RMSE 3.261, R2 0.128  (uncapped: MAE 2.447, RMSE 3.276, R2 0.121)
-
-Negative predictions on the test data: 303 of 15919
-$ python -c "import pandas as pd; print(pd.read_csv('results/regression_metrics.csv').round(3).to_string(index=False))"
-                                             Model  Rows   MAE    MSE  RMSE     R2
-               Baseline: predict the training mean 15919 2.713 12.286 3.505 -0.007
-Baseline (training mean), inspections with a prior 13983 2.642 11.951 3.457 -0.000
-                    Simple LR: PriorViolationCount 13983 2.499 11.313 3.363  0.053
-                 Multiple LR: all test inspections 15919 2.447 10.730 3.276  0.121
-        Multiple LR: test inspections with a prior 13983 2.407 10.416 3.227  0.128
-                    Multiple LR (train, 2022-2024) 45266 2.414 10.702 3.271  0.248
-                                 Simple LR (train) 30436 2.611 12.458 3.530  0.054
-
