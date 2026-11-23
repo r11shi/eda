@@ -65,6 +65,7 @@ NOTES = {
         ("We listed which inputs the tree uses most.", "previous result = Fail, then complaint inspection, then previous violations.", "most important inputs"),
         ("We drew the top three levels of the tree.", "each box shows the question, how many inspections reach it, and how many failed.", "draw the tree"),
         ("We followed three real paths through the tree and checked them on 2025.", "highest-risk path fails 55-58%, lowest 4-5%.", "three real decision paths"),
+        ("We calculated the Gini index by hand for the tree's first question and checked it against the tree.", "root Gini about 0.363; after splitting on 'previous result = Fail' about 0.356; the biggest decrease, so it is the first question.", "Gini index calculated by hand"),
     ],
 }
 
